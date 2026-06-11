@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Credit Note {{ doc.number }}{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <h2>Credit Note — {{ doc.number }}</h2>
+  <div>
+    <button class="btn btn-primary" onclick="window.print()">Print Credit Note</button>
+    <a class="btn btn-secondary" href="{{ url_for('returns.index') }}">All Returns</a>
+    <a class="btn btn-secondary" href="{{ url_for('billing.view', bid=doc.bill_id) }}">Original Invoice</a>
+  </div>
+</div>
+
+<div class="card challan-doc">
+  <h3 class="doc-title">Credit Note</h3>
+  <div class="grid grid-2">
+    <div>
+      <strong>{{ doc.facility.name }}</strong><br>
+      GSTIN: {{ doc.facility.gstin or '—' }}<br>
+      DL: {{ doc.facility.drug_license or '—' }}
+    </div>
+    <div style="text-align:right">
+      <div id="invoice-qr" style="display:inline-block;margin-bottom:0.5rem"></div>
+      <strong>Credit Note #:</strong> {{ doc.number }}<br>
+      <strong>Date:</strong> {{ doc.returned_on.strftime('%d-%b-%Y %H:%M') }}<br>
+      <strong>Against Invoice:</strong> {{ doc.bill.number }}<br>
+      <strong>Invoice Date:</strong> {{ doc.bill.billed_on.strftime('%d-%b-%Y') }}
+    </div>
+  </div>
+
+  <p style="margin-top:1rem">
+    <strong>Party:</strong> {{ doc.bill.customer_name }}
+    {% if doc.bill.customer_gstin %} ({{ doc.bill.customer_gstin }}){% endif %}
+  </p>
+  {% if doc.reason %}<p><strong>Reason:</strong> {{ doc.reason }}</p>{% endif %}
+
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Batch</th><th>Qty</th><th>Rate</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      {% for l in doc.lines %}
+      <tr>
+        <td>{{ l.item.name }}</td>
+        <td>{{ l.batch.batch_no }}</td>
+        <td>{{ l.qty }}</td>
+        <td>₹{{ l.rate }}</td>
+        <td>₹{{ l.taxable }}</td>
+        <td>₹{{ l.cgst }}</td>
+        <td>₹{{ l.sgst }}</td>
+        <td>₹{{ l.igst }}</td>
+        <td>₹{{ l.line_total }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><td colspan="4" style="text-align:right">Taxable</td><td colspan="5">₹{{ doc.taxable }}</td></tr>
+      <tr><td colspan="4" style="text-align:right">CGST / SGST / IGST</td><td colspan="5">₹{{ doc.cgst }} / ₹{{ doc.sgst }} / ₹{{ doc.igst }}</td></tr>
+      <tr><td colspan="4" style="text-align:right"><strong>Credit Amount</strong></td><td colspan="5"><strong>₹{{ doc.grand_total }}</strong></td></tr>
+    </tfoot>
+  </table>
+
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+    Scan QR for credit note verification. GST reversed per original tax invoice.
+  </p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+new QRCode(document.getElementById("invoice-qr"), {
+  text: {{ qr_payload|tojson }},
+  width: 120,
+  height: 120,
+  colorDark: "#111111",
+  colorLight: "#ffffff",
+  correctLevel: QRCode.CorrectLevel.M
+});
+</script>
+{% endblock %}

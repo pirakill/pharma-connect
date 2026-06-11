@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Barcode Labels — Infivita PharmaConnect</title>
+  <style>
+    @page { size: auto; margin: 8mm; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8mm; }
+    .toolbar { margin-bottom: 1rem; }
+    .toolbar button { padding: 0.5rem 1rem; cursor: pointer; }
+    .labels { display: flex; flex-wrap: wrap; gap: 6mm; }
+    .label {
+      width: 50mm;
+      height: 30mm;
+      border: 1px dashed #ccc;
+      padding: 2mm;
+      box-sizing: border-box;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    .label svg { max-width: 100%; height: 12mm; }
+    .label .name { font-size: 7pt; font-weight: bold; line-height: 1.2; margin-top: 1mm; overflow: hidden; max-height: 8mm; }
+    .label .meta { font-size: 6pt; color: #555; }
+    @media print { .toolbar { display: none; } .label { border: none; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="window.print()">Print Labels</button>
+    <button onclick="window.close()">Close</button>
+    <span style="margin-left:1rem;color:#666">{{ items|length }} label(s)</span>
+  </div>
+  <div class="labels">
+    {% for i in items %}
+    <div class="label">
+      <svg class="barcode" data-code="{{ i.barcode }}"></svg>
+      <div class="name">{{ i.name }}</div>
+      <div class="meta">₹{{ i.mrp }} · {{ i.code }}</div>
+    </div>
+    {% else %}
+    <p>No items with barcodes found. Add barcodes in Medicines master first.</p>
+    {% endfor %}
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+  <script>
+  document.querySelectorAll(".barcode").forEach(el => {
+    try {
+      JsBarcode(el, el.dataset.code, { format: "CODE128", width: 1.2, height: 32, displayValue: true, fontSize: 10, margin: 0 });
+    } catch (e) { el.outerHTML = `<div style="font-size:8pt">${el.dataset.code}</div>`; }
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Live Stock{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2><span class="live-dot"></span>Live Consignment Stock</h2>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+    <a class="btn btn-secondary" href="{{ url_for('inventory.restock') }}">Restock Alerts</a>
+    {% if is_distributor %}
+    <a class="btn btn-secondary" href="{{ url_for('inventory.limits') }}">Stock Limits</a>
+    <a class="btn btn-primary" href="{{ url_for('inventory.consignment_new') }}">Ship Stock</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if is_distributor and facilities %}
+<div class="grid grid-4" style="margin-bottom:1rem">
+  {% for f in facilities %}
+  <div class="card">
+    <h3>{{ f.facility_name }}</h3>
+    <div class="kpi-value">₹{{ "{:,.0f}".format(f.stock_value) }}</div>
+    <small style="color:var(--muted)">{{ f.sku_count }} SKUs · {{ "{:,.0f}".format(f.total_qty) }} units</small>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+  <table id="stock-table">
+    <thead>
+      <tr>
+        {% if is_distributor %}<th>Facility</th>{% endif %}
+        <th>Item</th><th>Code</th><th>Qty</th><th>Min</th><th>Max</th><th>Status</th><th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        {% if is_distributor %}<td>{{ r.facility_name }}</td>{% endif %}
+        <td>{{ r.item_name }}</td>
+        <td>{{ r.item_code }}</td>
+        <td {% if r.status == 'LOW' %}style="color:var(--danger);font-weight:600"{% endif %}>{{ r.qty }}</td>
+        <td>{{ r.min_qty if r.min_qty is not none else '—' }}</td>
+        <td>{{ r.max_qty if r.max_qty is not none else '—' }}</td>
+        <td>
+          {% if r.status == 'LOW' %}<span class="badge badge-low">LOW</span>
+          {% elif r.status == 'FULL' %}<span class="badge badge-full">FULL</span>
+          {% elif r.status == 'OK' %}<span class="badge badge-ok">OK</span>
+          {% else %}—{% endif %}
+        </td>
+        <td>₹{{ "{:,.0f}".format(r.value) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">No stock on hand</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function statusBadge(s) {
+  if (s === 'LOW') return '<span class="badge badge-low">LOW</span>';
+  if (s === 'FULL') return '<span class="badge badge-full">FULL</span>';
+  if (s === 'OK') return '<span class="badge badge-ok">OK</span>';
+  return '—';
+}
+setInterval(async () => {
+  const res = await fetch("{{ url_for('api.live_stock') }}");
+  const data = await res.json();
+  const dist = {{ 'true' if is_distributor else 'false' }};
+  const cols = dist ? 8 : 7;
+  const tbody = document.querySelector("#stock-table tbody");
+  if (!data.stock.length) {
+    tbody.innerHTML = `<tr><td colspan="${cols}">No stock</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.stock.map(s => {
+    const fac = dist ? `<td>${s.facility_name}</td>` : "";
+    const qtyStyle = s.status === 'LOW' ? 'style="color:var(--danger);font-weight:600"' : '';
+    const min = s.min_qty != null ? s.min_qty : '—';
+    const max = s.max_qty != null ? s.max_qty : '—';
+    return `<tr>${fac}<td>${s.item_name}</td><td>${s.item_code}</td><td ${qtyStyle}>${s.qty}</td><td>${min}</td><td>${max}</td><td>${statusBadge(s.status)}</td><td>₹${s.value.toLocaleString()}</td></tr>`;
+  }).join("");
+}, 10000);
+</script>
+{% endblock %}

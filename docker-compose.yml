@@ -1,0 +1,35 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      PHARMACONNECT_DB: sqlite:////data/pharmaconnect.db
+    volumes:
+      - pharmaconnect_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/ready')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  cron:
+    build: .
+    env_file:
+      - .env
+    environment:
+      PHARMACONNECT_DB: sqlite:////data/pharmaconnect.db
+    volumes:
+      - pharmaconnect_data:/data
+    entrypoint: []
+    command: ["sh", "scripts/run_alerts_loop.sh"]
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  pharmaconnect_data:

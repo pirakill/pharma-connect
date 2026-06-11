@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Accounting{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Accounting</h2>
+  <a class="btn btn-secondary" href="{{ url_for('accounting.parties') }}">B2B Parties</a>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1rem">
+  <div class="card"><h3>30-Day Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.sales) }}</div></div>
+  <div class="card"><h3>30-Day Receipts</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.receipts) }}</div></div>
+  <div class="card"><h3>Payable to {{ distributor_name }}</h3><div class="kpi-value" style="color:var(--warn)">₹{{ "{:,.2f}".format(consignment_payable) }}</div></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Pay Consignment Settlement</h3>
+    <p style="color:var(--muted);font-size:0.85rem">Auto-charged at PTR when you sell Infivita consignment stock.</p>
+    <form method="post" action="{{ url_for('accounting.settlement_pay') }}">
+      <div class="form-row">
+        <label>Pay to</label>
+        <input value="{{ distributor_name }}" readonly>
+      </div>
+      <div class="form-row">
+        <label>Amount (₹)</label>
+        <input name="amount" type="number" step="0.01" max="{{ consignment_payable }}" required>
+      </div>
+      <div class="form-row">
+        <label>Note</label>
+        <input name="note" placeholder="UPI / NEFT reference">
+      </div>
+      <button class="btn btn-primary" type="submit" {% if consignment_payable <= 0 %}disabled{% endif %}>Pay Settlement</button>
+    </form>
+
+    <h3 style="margin-top:1.5rem">Customer Receivables</h3>
+    <table>
+      <thead><tr><th>Party</th><th>GSTIN</th><th>Outstanding</th></tr></thead>
+      <tbody>
+        {% for r in receivables if r.party_name != distributor_name %}
+        <tr><td>{{ r.party_name }}</td><td>{{ r.party_gstin or '—' }}</td><td>₹{{ "{:,.2f}".format(r.outstanding) }}</td></tr>
+        {% else %}
+        <tr><td colspan="3">No customer receivables</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Recent Consignment Charges</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Bill</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for s in settlements %}
+        <tr>
+          <td>{{ s.created_at.strftime('%d-%b') }}</td>
+          <td>{{ s.bill.number }}</td>
+          <td>{{ s.item.name }}</td>
+          <td>{{ s.qty }}</td>
+          <td>₹{{ "{:,.2f}".format(s.amount) }}</td>
+          <td>{{ s.status }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">No settlements yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:1.5rem">Ledger Entries</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Type</th><th>Party</th><th>Debit</th><th>Credit</th></tr></thead>
+      <tbody>
+        {% for e in entries[:15] %}
+        <tr>
+          <td>{{ e.ts.strftime('%d-%b') }}</td>
+          <td>{{ e.entry_type }}</td>
+          <td>{{ e.party_name or '—' }}</td>
+          <td>{% if e.debit %}₹{{ e.debit }}{% endif %}</td>
+          <td>{% if e.credit %}₹{{ e.credit }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

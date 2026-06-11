@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Login — {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="login-wrap">
+  <div class="card login-card">
+    <h2 style="margin-top:0">Infivita Pharmaceuticals</h2>
+    <p style="color:var(--muted)">GSTIN 36AHEPD1696A4Z0 · Telangana<br>Consignment stock · Live visibility · Billing · GST</p>
+    <form method="post">
+      <div class="form-row">
+        <label>Username</label>
+        <input name="username" required autofocus>
+      </div>
+      <div class="form-row">
+        <label>Password</label>
+        <input name="password" type="password" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+    <p style="color:var(--muted);font-size:0.8rem;margin-top:1rem">
+      <code>distributor / admin</code> · <code>retail1 / admin</code> · <code>hospital1 / admin</code>
+    </p>
+  </div>
+</div>
+{% endblock %}

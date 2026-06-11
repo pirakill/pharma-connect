@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}GSTR-3B{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>GSTR-3B Summary — {{ summary.period }}</h2>
+  <form class="form-inline" method="get">
+    <div class="form-row"><label>Year</label><input name="year" type="number" value="{{ year }}"></div>
+    <div class="form-row"><label>Month</label><input name="month" type="number" min="1" max="12" value="{{ month }}"></div>
+    <button class="btn btn-secondary" type="submit">Load</button>
+    <a class="btn btn-primary" href="{{ url_for('reports.gstr3b_export', year=year, month=month) }}">Export JSON</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports.gstr3b_export', year=year, month=month, format='csv') }}">Export CSV</a>
+  </form>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1rem">
+  <div class="card"><h3>Gross Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.outward_taxable) }}</div></div>
+  <div class="card"><h3>Credit Notes ({{ summary.credit_note_count }})</h3><div class="kpi-value" style="color:var(--danger)">−₹{{ "{:,.0f}".format(summary.credit_taxable) }}</div></div>
+  <div class="card"><h3>Net Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_outward_taxable) }}</div></div>
+  <div class="card"><h3>Net Tax Liability</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_total_tax) }}</div></div>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th></th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total Tax</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Outward supplies (invoices)</td>
+        <td>₹{{ "{:,.2f}".format(summary.outward_taxable) }}</td>
+        <td>₹{{ summary.outward_cgst }}</td>
+        <td>₹{{ summary.outward_sgst }}</td>
+        <td>₹{{ summary.outward_igst }}</td>
+        <td>₹{{ "{:,.2f}".format(summary.total_tax) }}</td>
+      </tr>
+      <tr>
+        <td>Less: Credit notes (sales returns)</td>
+        <td>−₹{{ "{:,.2f}".format(summary.credit_taxable) }}</td>
+        <td>−₹{{ summary.credit_cgst }}</td>
+        <td>−₹{{ summary.credit_sgst }}</td>
+        <td>−₹{{ summary.credit_igst }}</td>
+        <td>−₹{{ "{:,.2f}".format(summary.credit_cgst + summary.credit_sgst + summary.credit_igst) }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><strong>Net liability</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_outward_taxable) }}</strong></td>
+        <td><strong>₹{{ summary.net_outward_cgst }}</strong></td>
+        <td><strong>₹{{ summary.net_outward_sgst }}</strong></td>
+        <td><strong>₹{{ summary.net_outward_igst }}</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_total_tax) }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+{% endblock %}

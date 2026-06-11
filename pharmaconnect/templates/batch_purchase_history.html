@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Batch Purchase History{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Batch-wise Purchase History</h2>
+</div>
+
+<form method="get" class="form-inline card" style="margin-bottom:1rem">
+  <div class="form-row">
+    <label>Batch number</label>
+    <input name="batch_no" value="{{ batch_no }}" placeholder="WH-PCM500 or B001">
+  </div>
+  <div class="form-row">
+    <label>Item</label>
+    <select name="item_id">
+      <option value="">All items</option>
+      {% for i in items %}
+      <option value="{{ i.id }}" {% if item_id == i.id %}selected{% endif %}>{{ i.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Search</button>
+</form>
+
+<div class="card">
+  {% if rows %}
+  <p style="color:var(--muted)">{{ rows|length }} purchase line(s) found.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th><th>Purchase #</th><th>Supplier</th><th>Warehouse</th>
+        <th>Item</th><th>Batch</th><th>Expiry</th>
+        <th>Purchased</th><th>Returned</th><th>Net Qty</th><th>Rate</th><th>Net Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.purchase_date }}</td>
+        <td>{{ r.purchase_number }}</td>
+        <td>{{ r.supplier }}</td>
+        <td>{{ r.warehouse }}</td>
+        <td>{{ r.item_name }} <small style="color:var(--muted)">{{ r.item_code }}</small></td>
+        <td><strong>{{ r.batch_no }}</strong></td>
+        <td>{{ r.expiry }}</td>
+        <td>{{ r.qty_purchased }}</td>
+        <td>{{ r.qty_returned }}</td>
+        <td>{{ r.qty_net }}</td>
+        <td>₹{{ r.rate }}</td>
+        <td>₹{{ "{:,.2f}".format(r.value_net) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted)">No purchase lines match your filters.</p>
+  {% endif %}
+</div>
+{% endblock %}

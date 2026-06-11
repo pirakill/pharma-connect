@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}GSTR-1{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>GSTR-1 — {{ summary.period }}</h2>
+  <form class="form-inline" method="get">
+    <div class="form-row"><label>Year</label><input name="year" type="number" value="{{ year }}"></div>
+    <div class="form-row"><label>Month</label><input name="month" type="number" min="1" max="12" value="{{ month }}"></div>
+    <button class="btn btn-secondary" type="submit">Load</button>
+    <a class="btn btn-primary" href="{{ url_for('reports.gstr1_export', year=year, month=month) }}">Export JSON</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports.gstr1_export', year=year, month=month, format='csv') }}">Export CSV</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports.gstr1_portal_export', year=year, month=month) }}">Portal JSON</a>
+  </form>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1rem">
+  <div class="card"><h3>B2C Invoices</h3><div class="kpi-value">{{ summary.b2c_count }}</div></div>
+  <div class="card"><h3>B2B Invoices</h3><div class="kpi-value">{{ summary.b2b_count }}</div></div>
+  <div class="card"><h3>Credit Notes</h3><div class="kpi-value">{{ summary.credit_note_count }}</div></div>
+  <div class="card"><h3>Net Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_taxable) }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:1rem">
+  <h3>Outward Supplies (Tax Invoices)</h3>
+  <table>
+    <thead><tr><th>Type</th><th>Invoice</th><th>Date</th><th>Customer</th><th>GSTIN</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for inv in summary.invoices %}
+      <tr>
+        <td><span class="badge badge-ok">INV</span></td>
+        <td>{{ inv.number }}</td>
+        <td>{{ inv.date }}</td>
+        <td>{{ inv.customer }}</td>
+        <td>{{ inv.gstin or '—' }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.taxable) }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.cgst) }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.sgst) }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.igst) }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.total) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10">No invoices in this period</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Credit Notes (Sales Returns) — Table 9B</h3>
+  <table>
+    <thead><tr><th>Type</th><th>Credit Note</th><th>Date</th><th>Original Inv</th><th>Customer</th><th>GSTIN</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for cn in summary.credit_notes %}
+      <tr>
+        <td><span class="badge badge-low">CRN</span></td>
+        <td>{{ cn.number }}</td>
+        <td>{{ cn.date }}</td>
+        <td>{{ cn.original_invoice }}</td>
+        <td>{{ cn.customer }}</td>
+        <td>{{ cn.gstin or '—' }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.taxable) }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.cgst) }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.sgst) }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.igst) }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.total) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="11">No credit notes in this period</td></tr>
+      {% endfor %}
+    </tbody>
+    {% if summary.credit_notes %}
+    <tfoot>
+      <tr>
+        <td colspan="6" style="text-align:right"><strong>Credit note totals</strong></td>
+        <td>₹{{ "{:,.2f}".format(summary.credit_taxable) }}</td>
+        <td>₹{{ "{:,.2f}".format(summary.credit_cgst) }}</td>
+        <td>₹{{ "{:,.2f}".format(summary.credit_sgst) }}</td>
+        <td>₹{{ "{:,.2f}".format(summary.credit_igst) }}</td>
+        <td>₹{{ "{:,.2f}".format(summary.credit_total) }}</td>
+      </tr>
+      <tr>
+        <td colspan="6" style="text-align:right"><strong>Net outward (INV − CRN)</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_taxable) }}</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_cgst) }}</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_sgst) }}</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_igst) }}</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_total) }}</strong></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+</div>
+{% endblock %}

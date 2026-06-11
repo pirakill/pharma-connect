@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Add Patient{% endblock %}
+{% block content %}
+<div class="topbar"><h2>Add Patient</h2></div>
+<div class="card" style="max-width:480px">
+  <form method="post">
+    <div class="form-row"><label>Name</label><input name="name" required></div>
+    <div class="form-row"><label>UHID</label><input name="uhid" placeholder="UHID-1001"></div>
+    <div class="form-row"><label>Ward</label><input name="ward" placeholder="ICU-3"></div>
+    <div class="form-row"><label>Phone</label><input name="phone"></div>
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-secondary" href="{{ url_for('patients.index') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

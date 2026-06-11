@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sales Returns{% endblock %}
+{% block content %}
+<div class="topbar"><h2>Sales Returns</h2></div>
+<div class="card">
+  <table>
+    <thead><tr><th>Return #</th><th>Bill</th><th>Date</th><th>Amount</th><th>GST Reversed</th><th></th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.number }}</td><td>{{ r.bill.number }}</td>
+        <td>{{ r.returned_on.strftime('%d-%b-%Y') }}</td>
+        <td>₹{{ r.grand_total }}</td>
+        <td>₹{{ (r.cgst or 0) + (r.sgst or 0) + (r.igst or 0) }}</td>
+        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('returns.credit_note', rid=r.id) }}">Credit Note</a></td>
+      </tr>
+      {% else %}<tr><td colspan="6">No returns</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}GSTR-3B Network{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>GSTR-3B — All Facilities — {{ summary.period }}</h2>
+  <form class="form-inline" method="get">
+    <div class="form-row"><label>Year</label><input name="year" type="number" value="{{ year }}"></div>
+    <div class="form-row"><label>Month</label><input name="month" type="number" min="1" max="12" value="{{ month }}"></div>
+    <button class="btn btn-secondary" type="submit">Load</button>
+    <a class="btn btn-primary" href="{{ url_for('reports.gstr3b_export', year=year, month=month) }}">Export JSON</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports.gstr3b_export', year=year, month=month, format='csv') }}">Export CSV</a>
+  </form>
+</div>
+
+<div class="grid grid-4">
+  <div class="card"><h3>Gross Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.outward_taxable) }}</div></div>
+  <div class="card"><h3>Credit Notes ({{ summary.credit_note_count }})</h3><div class="kpi-value" style="color:var(--danger)">−₹{{ "{:,.0f}".format(summary.credit_taxable) }}</div></div>
+  <div class="card"><h3>Net Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_outward_taxable) }}</div></div>
+  <div class="card"><h3>Net Tax Liability</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_total_tax) }}</div></div>
+</div>
+{% endblock %}

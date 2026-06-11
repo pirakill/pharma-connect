@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Purchase Returns{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Purchase Returns</h2>
+  <a class="btn btn-secondary" href="{{ url_for('purchase.index') }}">All Purchases</a>
+</div>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Return #</th><th>Date</th><th>Supplier</th><th>Purchase</th><th>Amount</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.number }}</td>
+        <td>{{ r.returned_on.strftime('%d-%b-%Y') }}</td>
+        <td>{{ r.supplier.name }}</td>
+        <td>{{ r.purchase.number }}</td>
+        <td>₹{{ r.grand_total }}</td>
+        <td>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('purchase.return_challan', prid=r.id) }}">Challan</a>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('purchase.credit_note', prid=r.id) }}">Debit Note</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No purchase returns recorded</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

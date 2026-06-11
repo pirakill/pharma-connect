@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features — Infivita PharmaConnect</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body class="landing-body">
+  <nav class="landing-nav">
+    <a href="{{ url_for('landing.welcome') }}"><strong style="color:var(--accent)">Infivita PharmaConnect</strong></a>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+  </nav>
+  <div style="max-width:1100px;margin:2rem auto;padding:0 1.5rem">
+    <h1>7 modules — ShelfCure parity + distributor superpowers</h1>
+    <div class="grid grid-2" style="margin-top:2rem">
+      {% for title, items in [
+        ('Smart Billing', ['Retail/Hospital/Institutional POS', 'Barcode scan', 'Loyalty points', 'WhatsApp invoice share', 'Auto promotions', 'Sales returns']),
+        ('Inventory Control', ['Live consignment stock', 'Batch + expiry + rack', 'Expired stock block', 'Write-off', 'Restock alerts', 'Challan on shipment']),
+        ('GST & Compliance', ['GST tax invoice', 'E-invoice JSON export', 'E-way bill stub', 'GSTR-1/2/3B export', 'HSN on every line']),
+        ('Reports & Profit', ['Real margin P&L', 'Sale/purchase register', 'Outstanding report', 'Item ledger', 'Expiry & slow-moving']),
+        ('Customer & Credit', ['Customer profiles', 'Credit limit enforcement', 'Loyalty redeem', 'Regular medicines', 'B2B parties']),
+        ('Supplier Mgmt', ['Supplier master', 'Purchase bills', 'CSV import', 'Supplier payments', 'GRN entry']),
+        ('Integrations & Ops', ['IRP / E-way / Razorpay / PhonePe config', 'IRN generation', 'SMS expiry alerts', 'Audit trail']),
+        ('Distributor Only', ['Network dashboard', 'Multi-facility live view', 'Consignment ship', 'PTR auto-settlement']),
+      ] %}
+      <div class="card">
+        <h3>{{ title }}</h3>
+        <ul style="color:var(--muted);padding-left:1.2rem">
+          {% for i in items %}<li>{{ i }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}New Purchase{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Record Purchase Bill (GRN)</h2>
+  <form method="post" id="purchase-form">
+    <div class="form-inline">
+      <div class="form-row"><label>Supplier</label>
+        <select name="supplier_id" required>{% for s in suppliers %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-row"><label>Supplier Invoice #</label><input name="invoice_no"></div>
+      {% if warehouses %}
+      <div class="form-row"><label>Warehouse</label>
+        <select name="warehouse_id">
+          {% for w in warehouses %}
+          <option value="{{ w.id }}">{{ w.code }} — {{ w.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="form-row" style="margin:1rem 0">
+      <label>Scan barcode to add line</label>
+      <input id="barcode-scan" placeholder="Scan or type barcode / item code..." autocomplete="off">
+    </div>
+
+    <table id="lines">
+      <thead><tr><th>Item</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Rate</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button type="button" class="btn btn-secondary" onclick="addLine()">+ Line</button>
+    <input type="hidden" name="lines_json" id="lines-json">
+    <button class="btn btn-primary" type="submit" style="margin-left:0.5rem">Save Purchase</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const items = [{% for i in items %}{id:{{ i.id }}, name:{{ i.name|tojson }}, mrp:{{ i.mrp }}, ptr:{{ i.ptr }}},{% endfor %}];
+
+function addLine(prefill) {
+  const tr = document.createElement('tr');
+  const itemId = prefill ? prefill.id : items[0].id;
+  const options = items.map(i => `<option value="${i.id}" ${i.id === itemId ? 'selected' : ''}>${i.name}</option>`).join('');
+  const rate = prefill ? prefill.rate : (items.find(i => i.id === itemId).ptr * 0.85).toFixed(2);
+  tr.innerHTML = `<td><select class="item" onchange="syncRate(this)">${options}</select></td>
+    <td><input class="batch" placeholder="B001" value="${prefill && prefill.batch ? prefill.batch : ''}"></td>
+    <td><input class="expiry" type="date" value="${prefill && prefill.expiry ? prefill.expiry : ''}"></td>
+    <td><input class="qty" type="number" step="0.001" value="${prefill && prefill.qty ? prefill.qty : '1'}"></td>
+    <td><input class="rate" type="number" step="0.01" value="${rate}"></td>
+    <td><button type="button" onclick="this.closest('tr').remove()">×</button></td>`;
+  document.querySelector('#lines tbody').appendChild(tr);
+}
+
+function syncRate(sel) {
+  const item = items.find(i => i.id === +sel.value);
+  if (item) sel.closest('tr').querySelector('.rate').value = (item.ptr * 0.85).toFixed(2);
+}
+
+document.getElementById('barcode-scan').addEventListener('keydown', async (e) => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const code = e.target.value.trim();
+  if (!code) return;
+  const res = await fetch(`{{ url_for('api.barcode_lookup', code='BARCODE') }}`.replace('BARCODE', encodeURIComponent(code)));
+  if (!res.ok) { alert('Item not found'); return; }
+  const item = await res.json();
+  addLine({ id: item.id, rate: item.rate, qty: 1 });
+  e.target.value = '';
+  e.target.focus();
+});
+
+addLine();
+document.getElementById('purchase-form').onsubmit = (e) => {
+  const lines = [...document.querySelectorAll('#lines tbody tr')].map(tr => ({
+    item_id: +tr.querySelector('.item').value,
+    batch_no: tr.querySelector('.batch').value,
+    expiry: tr.querySelector('.expiry').value,
+    qty: +tr.querySelector('.qty').value,
+    rate: +tr.querySelector('.rate').value,
+  })).filter(l => l.qty > 0 && l.batch_no && l.expiry);
+  document.getElementById('lines-json').value = JSON.stringify(lines);
+  if (!lines.length) { e.preventDefault(); alert('Add lines with batch, expiry and qty'); }
+};
+</script>
+{% endblock %}

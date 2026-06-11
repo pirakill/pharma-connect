@@ -1,0 +1,36 @@
+# Production PostgreSQL stack — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pharma
+      POSTGRES_PASSWORD: pharma
+      POSTGRES_DB: pharmaconnect
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharma -d pharmaconnect"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  web:
+    environment:
+      PHARMACONNECT_DB: postgresql+psycopg://pharma:pharma@postgres:5432/pharmaconnect
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["sh", "scripts/docker_entrypoint.sh"]
+
+  cron:
+    environment:
+      PHARMACONNECT_DB: postgresql+psycopg://pharma:pharma@postgres:5432/pharmaconnect
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Return Challan {{ doc.number }}{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <h2>Return Challan — {{ doc.number }}</h2>
+  <div>
+    <button class="btn btn-primary" onclick="window.print()">Print Challan</button>
+    <a class="btn btn-secondary" href="{{ url_for('purchase.credit_note', prid=doc.id) }}">Debit Note</a>
+    <a class="btn btn-secondary" href="{{ url_for('purchase.view', pid=doc.purchase_id) }}">Original Purchase</a>
+  </div>
+</div>
+
+<div class="card challan-doc">
+  <h3 class="doc-title">Purchase Return Challan</h3>
+  <div class="grid grid-2">
+    <div>
+      <strong>{{ doc.organization.name }}</strong><br>
+      GSTIN: {{ doc.organization.gstin or '—' }}<br>
+      {{ doc.organization.address or '' }}
+    </div>
+    <div style="text-align:right">
+      <strong>Challan #:</strong> {{ doc.number }}<br>
+      <strong>Date:</strong> {{ doc.returned_on.strftime('%d-%b-%Y %H:%M') }}<br>
+      <strong>Against Purchase:</strong> {{ doc.purchase.number }}
+    </div>
+  </div>
+
+  <p style="margin-top:1rem">
+    <strong>Return To (Supplier):</strong> {{ doc.supplier.name }}<br>
+    GSTIN: {{ doc.supplier.gstin or '—' }}<br>
+    {{ doc.supplier.address or '' }}
+  </p>
+  {% if doc.reason %}<p><strong>Reason:</strong> {{ doc.reason }}</p>{% endif %}
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Item</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>MRP</th></tr>
+    </thead>
+    <tbody>
+      {% for l in doc.lines %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ l.item.name }} <small style="color:var(--muted)">{{ l.item.code }}</small></td>
+        <td>{{ l.batch_no }}</td>
+        <td>{{ l.purchase_line.expiry.strftime('%d-%b-%Y') if l.purchase_line else '—' }}</td>
+        <td>{{ l.qty }}</td>
+        <td>₹{{ l.purchase_line.mrp if l.purchase_line else l.rate }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right"><strong>Total units returned</strong></td>
+        <td colspan="2"><strong>{{ doc.lines|sum(attribute='qty') }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+    Goods returned to supplier. Accompany with debit note {{ doc.number }} for GST adjustment.
+    Not a tax invoice.
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}GSTR-1 Network{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>GSTR-1 — All Facilities — {{ summary.period }}</h2>
+  <form class="form-inline" method="get">
+    <div class="form-row"><label>Year</label><input name="year" type="number" value="{{ year }}"></div>
+    <div class="form-row"><label>Month</label><input name="month" type="number" min="1" max="12" value="{{ month }}"></div>
+    <button class="btn btn-secondary" type="submit">Load</button>
+    <a class="btn btn-primary" href="{{ url_for('reports.gstr1_export', year=year, month=month) }}">Export JSON</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports.gstr1_export', year=year, month=month, format='csv') }}">Export CSV</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports.gstr1_portal_export', year=year, month=month) }}">Portal JSON</a>
+  </form>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1rem">
+  <div class="card"><h3>Facilities</h3><div class="kpi-value">{{ summary.facility_count }}</div></div>
+  <div class="card"><h3>Invoices</h3><div class="kpi-value">{{ summary.b2c_count + summary.b2b_count }}</div></div>
+  <div class="card"><h3>Credit Notes</h3><div class="kpi-value">{{ summary.credit_note_count }}</div></div>
+  <div class="card"><h3>Net Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_taxable) }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:1rem">
+  <h3>Outward Invoices (all facilities)</h3>
+  <table>
+    <thead><tr><th>Facility</th><th>Invoice</th><th>Date</th><th>Customer</th><th>Taxable</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for inv in summary.invoices %}
+      <tr>
+        <td>{{ inv.facility }}</td>
+        <td>{{ inv.number }}</td>
+        <td>{{ inv.date }}</td>
+        <td>{{ inv.customer }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.taxable) }}</td>
+        <td>₹{{ "{:,.2f}".format(inv.total) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No invoices this period</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Credit Notes (all facilities)</h3>
+  <table>
+    <thead><tr><th>Facility</th><th>Credit Note</th><th>Date</th><th>Original Inv</th><th>Taxable</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for cn in summary.credit_notes %}
+      <tr>
+        <td>{{ cn.facility }}</td>
+        <td>{{ cn.number }}</td>
+        <td>{{ cn.date }}</td>
+        <td>{{ cn.original_invoice }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.taxable) }}</td>
+        <td>₹{{ "{:,.2f}".format(cn.total) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No credit notes this period</td></tr>
+      {% endfor %}
+    </tbody>
+    {% if summary.credit_notes %}
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right"><strong>Net outward (INV − CRN)</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_taxable) }}</strong></td>
+        <td><strong>₹{{ "{:,.2f}".format(summary.net_total) }}</strong></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+</div>
+{% endblock %}

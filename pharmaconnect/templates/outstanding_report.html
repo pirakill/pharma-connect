@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Outstanding{% endblock %}
+{% block content %}
+<div class="topbar"><h2>Outstanding Report</h2></div>
+<div class="grid grid-2" style="margin-bottom:1rem">
+  <div class="card"><h3>Total Receivable</h3><div class="kpi-value">₹{{ "{:,.2f}".format(data.total_receivable) }}</div></div>
+  <div class="card"><h3>Total Payable</h3><div class="kpi-value">₹{{ "{:,.2f}".format(data.total_payable) }}</div></div>
+</div>
+<div class="grid grid-3">
+  <div class="card">
+    <h3>Retail Customers</h3>
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Due</th><th>Limit</th></tr></thead>
+      <tbody>
+        {% for c in data.customers %}
+        <tr>
+          <td>{{ c.name }}</td><td>{{ c.phone or '—' }}</td>
+          <td>₹{{ "{:,.2f}".format(c.outstanding) }}</td>
+          <td>{% if c.limit %}₹{{ "{:,.2f}".format(c.limit) }}{% else %}—{% endif %}</td>
+        </tr>
+        {% else %}<tr><td colspan="4">No customer dues</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>B2B Parties</h3>
+    <table>
+      <thead><tr><th>Party</th><th>GSTIN</th><th>Due</th></tr></thead>
+      <tbody>
+        {% for p in data.parties %}
+        <tr><td>{{ p.name }}</td><td>{{ p.gstin or '—' }}</td><td>₹{{ "{:,.2f}".format(p.outstanding) }}</td></tr>
+        {% else %}<tr><td colspan="3">No party dues</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Suppliers</h3>
+    <table>
+      <thead><tr><th>Supplier</th><th>GSTIN</th><th>Due</th></tr></thead>
+      <tbody>
+        {% for s in data.suppliers %}
+        <tr><td>{{ s.name }}</td><td>{{ s.gstin or '—' }}</td><td>₹{{ "{:,.2f}".format(s.outstanding) }}</td></tr>
+        {% else %}<tr><td colspan="3">No supplier dues</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <p style="margin-top:0.75rem"><a href="{{ url_for('purchase.suppliers') }}">Record supplier payment →</a></p>
+  </div>
+</div>
+{% endblock %}

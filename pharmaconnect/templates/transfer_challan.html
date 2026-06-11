@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Transfer {{ transfer.number }}{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <h2>Stock Transfer Note — {{ transfer.number }}</h2>
+  <div>
+    <button class="btn btn-primary" onclick="window.print()">Print</button>
+    <a class="btn btn-secondary" href="{{ url_for('inventory.transfers') }}">All Transfers</a>
+  </div>
+</div>
+
+<div class="card challan-doc">
+  <h3 class="doc-title">Internal Stock Transfer</h3>
+  <div class="grid grid-2">
+    <div>
+      <strong>{{ transfer.distributor.name }}</strong><br>
+      GSTIN: {{ transfer.distributor.gstin or '—' }}
+    </div>
+    <div style="text-align:right">
+      <strong>Transfer #:</strong> {{ transfer.number }}<br>
+      <strong>Date:</strong> {{ transfer.transferred_on.strftime('%d-%b-%Y %H:%M') }}
+    </div>
+  </div>
+
+  <p style="margin-top:1rem">
+    <strong>From:</strong> {{ transfer.from_warehouse.name }} ({{ transfer.from_warehouse.code }})<br>
+    <strong>To:</strong> {{ transfer.to_warehouse.name }} ({{ transfer.to_warehouse.code }})
+  </p>
+  {% if transfer.note %}<p><strong>Note:</strong> {{ transfer.note }}</p>{% endif %}
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Item</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>MRP</th><th>PTR</th></tr>
+    </thead>
+    <tbody>
+      {% for l in transfer.lines %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ l.item.name }}</td>
+        <td>{{ l.batch_no }}</td>
+        <td>{{ l.expiry.strftime('%d-%b-%Y') }}</td>
+        <td><strong>{{ l.qty }}</strong></td>
+        <td>₹{{ l.mrp }}</td>
+        <td>₹{{ l.ptr }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+    Internal warehouse transfer — not a sale. Stock ownership remains with {{ transfer.distributor.name }}.
+  </p>
+</div>
+{% endblock %}

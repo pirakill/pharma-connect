@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Purchases{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Purchase Bills</h2>
+  <div>
+    <a class="btn btn-secondary" href="{{ url_for('purchase.import_csv') }}">Import CSV</a>
+    <a class="btn btn-secondary" href="{{ url_for('purchase.returns_list') }}">Returns</a>
+    <a class="btn btn-secondary" href="{{ url_for('purchase.suppliers') }}">Suppliers</a>
+    <a class="btn btn-primary" href="{{ url_for('purchase.new') }}">New Purchase</a>
+  </div>
+</div>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Bill #</th><th>Supplier</th><th>Warehouse</th><th>Invoice</th><th>Date</th><th>Total</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in rows %}
+      <tr>
+        <td>{{ p.number }}</td>
+        <td>{{ p.supplier.name }}</td>
+        <td>{{ p.warehouse.code if p.warehouse else '—' }}</td>
+        <td>{{ p.invoice_no or '—' }}</td>
+        <td>{{ p.purchased_on.strftime('%d-%b-%Y') }}</td>
+        <td>₹{{ p.grand_total }}</td>
+        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('purchase.view', pid=p.id) }}">View</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">No purchases recorded</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

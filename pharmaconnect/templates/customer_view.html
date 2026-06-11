@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ c.name }}{% endblock %}
+{% block content %}
+<div class="topbar"><h2>{{ c.name }}</h2></div>
+<div class="grid grid-2">
+  <div class="card">
+    <p>Phone: {{ c.phone or '—' }} · Outstanding: <strong>₹{{ "{:,.2f}".format(c.outstanding) }}</strong> · Loyalty: <strong>{{ c.loyalty_points or 0 }} pts</strong></p>
+    <h3>Regular Medicines</h3>
+    <ul>{% for r in regular %}<li>{{ r.item.name }} ({{ r.typical_qty }})</li>{% else %}<li>None set</li>{% endfor %}</ul>
+    <h3>Frequently Bought</h3>
+    <ul>{% for f in frequent %}<li>{{ f.name }} — {{ f.qty }} times</li>{% else %}<li>No history</li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h3>Purchase History</h3>
+    <table>
+      <thead><tr><th>Bill</th><th>Date</th><th>Total</th></tr></thead>
+      <tbody>{% for h in history %}<tr><td>{{ h.number }}</td><td>{{ h.date }}</td><td>₹{{ h.total }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

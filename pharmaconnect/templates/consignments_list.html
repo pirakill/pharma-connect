@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Consignment Challans{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Consignment Challans</h2>
+  <a class="btn btn-primary" href="{{ url_for('inventory.consignment_new') }}">Ship Consignment</a>
+</div>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Challan #</th><th>Facility</th><th>Date</th><th>Lines</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for s in rows %}
+      <tr>
+        <td>{{ s.number }}</td>
+        <td>{{ s.facility.name }}</td>
+        <td>{{ s.shipped_on.strftime('%d-%b-%Y %H:%M') }}</td>
+        <td>{{ s.lines|length }}</td>
+        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('inventory.consignment_challan', sid=s.id) }}">View / Print</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">No consignment shipments yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

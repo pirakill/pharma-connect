@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ org.name }} Dashboard{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>{{ org.name }}</h2>
+  <a class="btn btn-primary" href="{{ url_for('billing.new') }}">New Bill</a>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1.5rem">
+  <div class="card"><h3>30-Day Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.sales) }}</div></div>
+  <div class="card"><h3>Receipts</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.receipts) }}</div></div>
+  <div class="card"><h3>Receivables</h3><div class="kpi-value">{{ receivables|length }}</div></div>
+  <div class="card"><h3>Low Stock Items</h3><div class="kpi-value" style="color:{% if restock_alerts %}var(--danger){% else %}var(--success){% endif %}">{{ restock_alerts|length }}</div></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Your Consignment Stock</h3>
+    <table>
+      <thead><tr><th>Item</th><th>Qty</th><th>Min/Max</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for s in stock %}
+        <tr>
+          <td>{{ s.item_name }}</td>
+          <td {% if s.status == 'LOW' %}style="color:var(--danger);font-weight:600"{% endif %}>{{ s.qty }}</td>
+          <td>{% if s.min_qty is not none %}{{ s.min_qty }}/{{ s.max_qty }}{% else %}—{% endif %}</td>
+          <td>{% if s.status == 'LOW' %}<span class="badge badge-low">LOW</span>{% elif s.status %}<span class="badge badge-ok">{{ s.status }}</span>{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if restock_alerts %}
+    <a href="{{ url_for('inventory.restock') }}" style="font-size:0.85rem;color:var(--danger)">{{ restock_alerts|length }} item(s) need restock from Infivita →</a>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h3>Outstanding Receivables</h3>
+    <table>
+      <thead><tr><th>Party</th><th>Amount</th></tr></thead>
+      <tbody>
+        {% for r in receivables %}
+        <tr><td>{{ r.party_name }}</td><td>₹{{ "{:,.2f}".format(r.outstanding) }}</td></tr>
+        {% else %}
+        <tr><td colspan="2">None</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Import Medicines{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Import Medicines (CSV)</h2>
+  <a class="btn btn-secondary" href="{{ url_for('items.download_template') }}">Download Template</a>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      <div class="form-row">
+        <label>Upload CSV file</label>
+        <input type="file" name="file" accept=".csv,.txt">
+      </div>
+      <p style="color:var(--muted);font-size:0.85rem">— or paste CSV below —</p>
+      <div class="form-row">
+        <label>Paste CSV</label>
+        <textarea name="csv_text" rows="12" placeholder="code,name,barcode,manufacturer,pack,unit,schedule,hsn,gst_rate,mrp,ptr"></textarea>
+      </div>
+      <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;color:var(--muted)">
+        <input type="checkbox" name="update_existing" checked> Update existing items (match by code)
+      </label>
+      <button class="btn btn-primary" type="submit">Import</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>CSV format</h3>
+    <p style="color:var(--muted);font-size:0.9rem">Required columns: <code>code</code>, <code>name</code></p>
+    <p style="color:var(--muted);font-size:0.9rem">Optional: barcode, manufacturer, pack, unit, schedule, hsn, gst_rate, mrp, ptr</p>
+    <p style="color:var(--muted);font-size:0.9rem">Aliases accepted: sku, item_code, medicine, gst%, tax_rate</p>
+    <pre style="background:var(--bg);padding:1rem;border-radius:8px;font-size:0.8rem;overflow:auto">code,name,barcode,manufacturer,pack,unit,schedule,hsn,gst_rate,mrp,ptr
+PCM500,Paracetamol 500mg,890101001001,Cipla,1x15,strip,,3004,12,35,28
+AMX500,Amoxicillin 500mg,890101001002,Sun Pharma,1x10,strip,H,3004,12,120,95</pre>
+
+    {% if result %}
+    <h3 style="margin-top:1rem">Last import</h3>
+    <ul>
+      <li>Created: <strong>{{ result.created }}</strong></li>
+      <li>Updated: <strong>{{ result.updated }}</strong></li>
+      <li>Skipped: {{ result.skipped }}</li>
+    </ul>
+    {% if result.errors %}
+    <p style="color:var(--danger)">Errors ({{ result.errors|length }}):</p>
+    <ul style="color:var(--danger);font-size:0.85rem;max-height:200px;overflow:auto">
+      {% for e in result.errors[:20] %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

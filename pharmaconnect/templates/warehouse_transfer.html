@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Warehouse Transfer{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Warehouse Transfer</h2>
+  <a class="btn btn-secondary" href="{{ url_for('inventory.transfers') }}">Transfer History</a>
+</div>
+<div class="card">
+  <form method="post" id="xfer-form">
+    <div class="form-inline">
+      <div class="form-row">
+        <label>From warehouse</label>
+        <select name="from_warehouse_id" id="from-wh" required onchange="loadSourceBatches()">
+          {% for w in warehouses %}
+          <option value="{{ w.id }}">{{ w.code }} — {{ w.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <label>To warehouse</label>
+        <select name="to_warehouse_id" required>
+          {% for w in warehouses %}
+          <option value="{{ w.id }}" {% if loop.index == 2 %}selected{% endif %}>{{ w.code }} — {{ w.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row" style="flex:2">
+        <label>Note</label>
+        <input name="note" placeholder="Optional">
+      </div>
+    </div>
+
+    <div class="form-row" style="margin:1rem 0">
+      <label>Pick from source stock</label>
+      <select id="batch-pick" onchange="addFromBatch()">
+        <option value="">— Select batch to add —</option>
+      </select>
+    </div>
+
+    <table id="lines-table">
+      <thead>
+        <tr><th>Item</th><th>Batch</th><th>Expiry</th><th>MRP</th><th>PTR</th><th>Cost</th><th>Qty</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button type="button" class="btn btn-secondary" onclick="addLine()">+ Add line</button>
+    <button type="submit" class="btn btn-primary" style="margin-left:0.5rem">Post Transfer</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const itemData = {
+  {% for i in items %}
+  {{ i.id }}: { name: {{ i.name|tojson }}, mrp: {{ i.mrp }}, ptr: {{ i.ptr }} },
+  {% endfor %}
+};
+let sourceBatches = [];
+
+async function loadSourceBatches() {
+  const whId = document.getElementById("from-wh").value;
+  const res = await fetch(`{{ url_for('api.warehouse_batches', wh_id=0) }}`.replace('/0/', `/${whId}/`));
+  sourceBatches = res.ok ? await res.json() : [];
+  const sel = document.getElementById("batch-pick");
+  sel.innerHTML = '<option value="">— Select batch to add —</option>' +
+    sourceBatches.map((b, idx) =>
+      `<option value="${idx}">${b.item_name} · ${b.batch_no} · qty ${b.qty}</option>`
+    ).join("");
+}
+
+function addLine(prefill) {
+  const tbody = document.querySelector("#lines-table tbody");
+  const tr = document.createElement("tr");
+  const itemId = prefill ? String(prefill.item_id) : Object.keys(itemData)[0];
+  const options = Object.entries(itemData).map(([id, d]) =>
+    `<option value="${id}" ${id === itemId ? "selected" : ""}>${d.name}</option>`
+  ).join("");
+  tr.innerHTML = `
+    <td><select name="item_id" onchange="fillRates(this)">${options}</select></td>
+    <td><input name="batch_no" required value="${prefill ? prefill.batch_no : ""}"></td>
+    <td><input name="expiry" type="date" required value="${prefill ? prefill.expiry : ""}"></td>
+    <td><input name="mrp" type="number" step="0.01" required value="${prefill ? prefill.mrp : ""}"></td>
+    <td><input name="ptr" type="number" step="0.01" required value="${prefill ? prefill.ptr : ""}"></td>
+    <td><input name="cost_rate" type="number" step="0.01" required value="${prefill ? prefill.cost_rate : ""}"></td>
+    <td><input name="qty" type="number" step="0.001" required value="${prefill ? prefill.qty : ""}"></td>
+    <td><button type="button" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(tr);
+  if (!prefill) fillRates(tr.querySelector("select"));
+}
+
+function addFromBatch() {
+  const idx = document.getElementById("batch-pick").value;
+  if (idx === "") return;
+  const b = sourceBatches[+idx];
+  addLine({ item_id: b.item_id, batch_no: b.batch_no, expiry: b.expiry, mrp: b.mrp, ptr: b.ptr, cost_rate: b.cost_rate, qty: b.qty });
+  document.getElementById("batch-pick").value = "";
+}
+
+function fillRates(sel) {
+  const d = itemData[sel.value];
+  const row = sel.closest("tr");
+  row.querySelector('[name="mrp"]').value = d.mrp;
+  row.querySelector('[name="ptr"]').value = d.ptr;
+  row.querySelector('[name="cost_rate"]').value = (d.ptr * 0.85).toFixed(2);
+}
+
+loadSourceBatches();
+</script>
+{% endblock %}

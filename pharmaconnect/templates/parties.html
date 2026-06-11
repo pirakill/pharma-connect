@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Institutional Parties{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Institutional / B2B Parties</h2>
+  <a class="btn btn-secondary" href="{{ url_for('accounting.index') }}">Accounting</a>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Add Party</h3>
+    <form method="post" action="{{ url_for('accounting.party_new') }}">
+      <div class="form-row">
+        <label>Party name</label>
+        <input name="party_name" required placeholder="Hospital / Govt dept">
+      </div>
+      <div class="form-row">
+        <label>GSTIN</label>
+        <input name="party_gstin" placeholder="36AAAAA0000A1Z5" maxlength="15">
+      </div>
+      <button class="btn btn-primary" type="submit">Save Party</button>
+    </form>
+    <p style="color:var(--muted);font-size:0.85rem;margin-top:0.75rem">
+      Parties appear in Institutional billing with credit tracking.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Registered Parties</h3>
+    <table>
+      <thead><tr><th>Party</th><th>GSTIN</th><th>Outstanding</th><th>Last Txn</th></tr></thead>
+      <tbody>
+        {% for p in parties %}
+        <tr>
+          <td>{{ p.party_name }}</td>
+          <td>{{ p.party_gstin or '—' }}</td>
+          <td>₹{{ "{:,.2f}".format(p.outstanding) }}</td>
+          <td>{{ p.last_txn_on.strftime('%d-%b-%Y') if p.last_txn_on else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No parties yet — add one for institutional credit billing</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

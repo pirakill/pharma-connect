@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}SMS Alerts{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>SMS Alert Log</h2>
+  <a class="btn btn-secondary" href="{{ url_for('settings.integrations') }}">Integrations</a>
+</div>
+<div class="card" style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end">
+  <form method="post" style="display:flex;gap:0.5rem;align-items:flex-end">
+    <div class="form-row"><label>Test phone</label><input name="phone" placeholder="9876543210"></div>
+    <input type="hidden" name="action" value="send_test">
+    <button class="btn btn-secondary" type="submit">Send Test SMS</button>
+  </form>
+  {% if is_distributor %}
+  <form method="post"><input type="hidden" name="action" value="expiry_alerts"><button class="btn btn-primary" type="submit">Run Expiry Alerts</button></form>
+  <form method="post"><input type="hidden" name="action" value="restock_alerts"><button class="btn btn-primary" type="submit">Run Low-Stock Alerts</button></form>
+  {% endif %}
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Time</th><th>Phone</th><th>Type</th><th>Status</th><th>Message</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.ts.strftime('%d-%b-%Y %H:%M') }}</td>
+        <td>{{ r.phone }}</td>
+        <td>{{ r.alert_type or '—' }}</td>
+        <td>{{ r.status }}</td>
+        <td style="max-width:360px">{{ r.message }}</td>
+      </tr>
+      {% else %}<tr><td colspan="5">No SMS sent yet</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

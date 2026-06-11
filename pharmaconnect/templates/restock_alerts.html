@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Restock Alerts{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Restock Alerts</h2>
+  {% if is_distributor %}
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+    <a class="btn btn-secondary" href="{{ url_for('inventory.limits') }}">Set Limits</a>
+    <a class="btn btn-primary" href="{{ url_for('inventory.consignment_new') }}">Ship Consignment</a>
+  </div>
+  {% endif %}
+</div>
+
+{% if is_distributor and facilities %}
+<form method="get" class="form-inline" style="margin-bottom:1rem">
+  <div class="form-row">
+    <label>Filter facility</label>
+    <select name="facility_id" onchange="this.form.submit()">
+      <option value="">All facilities</option>
+      {% for f in facilities %}
+      <option value="{{ f.id }}" {% if facility_id == f.id %}selected{% endif %}>{{ f.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+{% endif %}
+
+<div class="card">
+  {% if alerts %}
+  <p style="color:var(--muted)">{{ alerts|length }} item(s) at or below minimum stock.
+  {% if is_distributor and facility_id %}
+  <a class="btn btn-primary btn-sm" href="{{ url_for('inventory.consignment_new', facility_id=facility_id, restock=1) }}" style="margin-left:0.5rem">Ship all restock for this facility</a>
+  {% endif %}
+  </p>
+  <table>
+    <thead>
+      <tr>
+        {% if is_distributor %}<th>Facility</th>{% endif %}
+        <th>Item</th><th>Current</th><th>Min</th><th>Max</th><th>Suggest Ship</th><th>Status</th>
+        {% if is_distributor %}<th></th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr>
+        {% if is_distributor %}<td>{{ a.facility_name }}</td>{% endif %}
+        <td>{{ a.item_name }} <small style="color:var(--muted)">{{ a.item_code }}</small></td>
+        <td style="color:var(--danger);font-weight:600">{{ a.qty }}</td>
+        <td>{{ a.min_qty }}</td>
+        <td>{{ a.max_qty }}</td>
+        <td><strong>{{ a.suggest_qty }}</strong></td>
+        <td><span class="badge badge-low">LOW</span></td>
+        {% if is_distributor %}
+        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('inventory.consignment_new', facility_id=a.facility_id, restock=1) }}">Ship restock</a></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--success)">All items are above minimum stock levels.</p>
+  {% endif %}
+</div>
+{% endblock %}

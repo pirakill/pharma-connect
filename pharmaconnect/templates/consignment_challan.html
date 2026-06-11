@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Challan {{ shipment.number }}{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <h2>Delivery Challan — {{ shipment.number }}</h2>
+  <div>
+    <button class="btn btn-primary" onclick="window.print()">Print Challan</button>
+    <a class="btn btn-secondary" href="{{ url_for('inventory.consignments') }}">All Challans</a>
+    <a class="btn btn-secondary" href="{{ url_for('inventory.live') }}">Live Stock</a>
+  </div>
+</div>
+
+<div class="card challan-doc">
+  <h3 class="doc-title">Delivery Challan</h3>
+  <div class="grid grid-2">
+    <div>
+      <strong>{{ shipment.distributor.name }}</strong><br>
+      GSTIN: {{ shipment.distributor.gstin or '—' }}<br>
+      {{ shipment.distributor.address or '' }}
+    </div>
+    <div style="text-align:right">
+      <strong>Challan #:</strong> {{ shipment.number }}<br>
+      <strong>Date:</strong> {{ shipment.shipped_on.strftime('%d-%b-%Y %H:%M') }}<br>
+      <strong>Status:</strong> {{ shipment.status }}
+    </div>
+  </div>
+
+  <p style="margin-top:1rem">
+    <strong>Ship To:</strong> {{ shipment.facility.name }} ({{ shipment.facility.kind }})<br>
+    GSTIN: {{ shipment.facility.gstin or '—' }}<br>
+    {{ shipment.facility.address or '' }}
+  </p>
+  {% if shipment.note %}
+  <p><strong>Note:</strong> {{ shipment.note }}</p>
+  {% endif %}
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Item</th><th>Batch</th><th>Expiry</th><th>MRP</th><th>PTR</th><th>Qty</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in shipment.lines %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ l.item.name }} <small style="color:var(--muted)">{{ l.item.code }}</small></td>
+        <td>{{ l.batch_no }}</td>
+        <td>{{ l.expiry.strftime('%d-%b-%Y') }}</td>
+        <td>₹{{ l.mrp }}</td>
+        <td>₹{{ l.ptr }}</td>
+        <td><strong>{{ l.qty }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="6" style="text-align:right"><strong>Total units</strong></td>
+        <td><strong>{{ shipment.lines|sum(attribute='qty') }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="grid grid-2" style="margin-top:2rem">
+    <div>
+      <p style="color:var(--muted);font-size:0.85rem">Dispatched by (Infivita)</p>
+      <div style="border-top:1px solid var(--border);margin-top:2.5rem;padding-top:0.5rem">Authorised Signatory</div>
+    </div>
+    <div>
+      <p style="color:var(--muted);font-size:0.85rem">Received by ({{ shipment.facility.name }})</p>
+      <div style="border-top:1px solid var(--border);margin-top:2.5rem;padding-top:0.5rem">Receiver Signature &amp; Date</div>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+    This is a delivery challan for consignment stock. Not a tax invoice. Title remains with {{ shipment.distributor.name }} until sold.
+  </p>
+</div>
+{% endblock %}

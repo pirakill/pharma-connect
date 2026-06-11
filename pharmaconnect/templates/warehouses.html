@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Warehouses{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Warehouses</h2>
+  <div>
+    <a class="btn btn-secondary" href="{{ url_for('inventory.transfer') }}">Transfer Stock</a>
+    <a class="btn btn-secondary" href="{{ url_for('inventory.transfers') }}">Transfer History</a>
+    <a class="btn btn-primary" href="{{ url_for('purchase.new') }}">Record Purchase</a>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Stock by Warehouse</h3>
+    <table>
+      <thead>
+        <tr><th>Code</th><th>Name</th><th>SKUs</th><th>Units</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.warehouse_code }}</td>
+          <td>{{ r.warehouse_name }}</td>
+          <td>{{ r.sku_count }}</td>
+          <td>{{ r.total_qty }}</td>
+          <td>₹{{ "{:,.0f}".format(r.stock_value) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">No warehouses yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Add Warehouse</h3>
+    <form method="post">
+      <div class="form-row">
+        <label>Code</label>
+        <input name="code" required placeholder="WH02" maxlength="20">
+      </div>
+      <div class="form-row">
+        <label>Name</label>
+        <input name="name" required placeholder="Hyderabad Cold Chain">
+      </div>
+      <div class="form-row">
+        <label>Address</label>
+        <input name="address" placeholder="Optional">
+      </div>
+      <button class="btn btn-primary" type="submit">Create Warehouse</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

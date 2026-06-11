@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Audit Trail{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Audit Trail</h2>
+  <div>
+    <a class="btn btn-secondary" href="{{ url_for('settings.audit_export') }}">Export CSV</a>
+    <a class="btn btn-secondary" href="{{ url_for('settings.integrations') }}">Integrations</a>
+  </div>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Ref</th><th>Detail</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.ts.strftime('%d-%b-%Y %H:%M') }}</td>
+        <td>{{ r.user.username if r.user else '—' }}</td>
+        <td>{{ r.action }}</td>
+        <td>{{ r.entity_type or '—' }}</td>
+        <td>{{ r.entity_ref or '—' }}</td>
+        <td>{{ r.detail or '—' }}</td>
+      </tr>
+      {% else %}<tr><td colspan="6">No audit entries yet</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

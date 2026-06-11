@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}New Bill{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>New {{ bill_type }} Bill</h2>
+  <a class="btn btn-secondary" href="{{ url_for('billing.index') }}">All Bills</a>
+</div>
+
+<form method="post" class="pos-layout" id="bill-form">
+  <div class="card">
+    <div class="form-inline">
+      <div class="form-row">
+        <label>Bill Type</label>
+        <select name="bill_type">
+          <option value="RETAIL" {% if bill_type=='RETAIL' %}selected{% endif %}>Retail POS</option>
+          <option value="HOSPITAL" {% if bill_type=='HOSPITAL' %}selected{% endif %}>Hospital Issue</option>
+          <option value="INSTITUTIONAL" {% if bill_type=='INSTITUTIONAL' %}selected{% endif %}>Institutional</option>
+        </select>
+      </div>
+      <div class="form-row" id="retail-customer-row">
+        <label>Customer</label>
+        <select name="retail_customer_id" id="customer-select" onchange="loadCustomer()">
+          <option value="">Walk-in</option>
+          {% for c in retail_customers %}
+          <option value="{{ c.id }}">{{ c.name }}{% if c.outstanding %} (₹{{ c.outstanding }} due){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row" id="institutional-party-row" style="display:none">
+        <label>Institutional Party</label>
+        <select id="party-select" onchange="loadParty()">
+          <option value="">— Select party —</option>
+          {% for p in institutional_parties %}
+          <option value="{{ p.party_name }}" data-gstin="{{ p.party_gstin or '' }}" data-outstanding="{{ p.outstanding or 0 }}">
+            {{ p.party_name }}{% if p.outstanding %} (₹{{ p.outstanding }} due){% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Customer / Party name</label>
+        <input name="customer_name" id="customer-name" value="Walk-in">
+      </div>
+      <div class="form-row">
+        <label>GSTIN (B2B)</label>
+        <input name="customer_gstin" id="customer-gstin" placeholder="29AAAAA0000A1Z5">
+      </div>
+      <div class="form-row" id="order-ref-row" style="display:none">
+        <label>PO / Order Ref</label>
+        <input name="order_ref" id="order-ref" placeholder="PO-2026-001">
+      </div>
+      <div class="form-row">
+        <label>Payment</label>
+        <select name="payment_mode" id="payment-mode">
+          <option value="CASH">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="CARD">Card</option>
+          <option value="CREDIT">Credit</option>
+        </select>
+      </div>
+      <div class="form-row" id="payment-ref-row" style="display:none">
+        <label>UPI / Card Reference</label>
+        <input name="payment_ref" id="payment-ref" placeholder="Txn ID / last 4 digits">
+      </div>
+    </div>
+    {% if org.kind == 'HOSPITAL' %}
+    <div class="form-inline">
+      <div class="form-row">
+        <label>Patient</label>
+        <select name="patient_id">
+          <option value="">—</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}">{{ p.name }}{% if p.ward %} ({{ p.ward }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Doctor</label>
+        <input name="doctor_name">
+      </div>
+    </div>
+    {% endif %}
+
+    {% if favourites %}
+    <div style="margin-bottom:0.75rem">
+      <label style="color:var(--muted);font-size:0.85rem">Favourites</label>
+      <div style="display:flex;flex-wrap:wrap;gap:0.35rem">
+        {% for f in favourites %}
+        <button type="button" class="btn btn-secondary" style="font-size:0.8rem;padding:0.35rem 0.6rem"
+          onclick="addItem({{ f.item.id }}, '{{ f.item.name|replace("'", "\\'") }}', {{ f.item.mrp }}, {{ stock_map.get(f.item.id, 0) }})">{{ f.item.name }}</button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if schemes %}
+    <p style="color:var(--accent);font-size:0.85rem">Active offers: {% for s in schemes %}{{ s.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    {% endif %}
+    <div class="form-row">
+      <label>Search or scan barcode</label>
+      <input id="item-search" placeholder="Medicine name or barcode..." autocomplete="off">
+    </div>
+    <div id="customer-context" style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem"></div>
+    <div id="search-results" style="max-height:160px;overflow:auto"></div>
+
+    <table class="pos-lines" id="lines-table">
+      <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <input type="hidden" name="lines_json" id="lines-json">
+  </div>
+
+  <div class="card">
+    <div class="form-row">
+      <label>Bill Discount (₹)</label>
+      <input name="discount" type="number" step="0.01" value="0">
+    </div>
+    <div class="form-row" id="loyalty-redeem-row" style="display:none">
+      <label>Redeem Loyalty Points (1 pt = ₹1)</label>
+      <input name="loyalty_redeem" id="loyalty-redeem" type="number" min="0" step="1" value="0">
+      <small id="loyalty-hint" style="color:var(--muted)"></small>
+    </div>
+    <div class="pos-total" id="total-display">₹0.00</div>
+    <button class="btn btn-primary btn-block" type="submit" style="margin-top:1rem">Post Bill & Print</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+const stockMap = {{ stock_map|tojson }};
+const lines = [];
+
+function syncBillTypeUI() {
+  const billType = document.querySelector('select[name="bill_type"]').value;
+  const isInst = billType === 'INSTITUTIONAL';
+  document.getElementById('retail-customer-row').style.display = isInst ? 'none' : '';
+  document.getElementById('institutional-party-row').style.display = isInst ? '' : 'none';
+  document.getElementById('order-ref-row').style.display = isInst ? '' : 'none';
+  if (isInst) {
+    document.getElementById('payment-mode').value = 'CREDIT';
+    if (!document.getElementById('customer-name').value || document.getElementById('customer-name').value === 'Walk-in') {
+      document.getElementById('customer-name').value = '';
+    }
+  }
+}
+
+function loadParty() {
+  const sel = document.getElementById('party-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) return;
+  document.getElementById('customer-name').value = opt.value;
+  document.getElementById('customer-gstin').value = opt.dataset.gstin || '';
+}
+
+function syncPaymentRefUI() {
+  const mode = document.getElementById("payment-mode").value;
+  const show = mode === "UPI" || mode === "CARD";
+  document.getElementById("payment-ref-row").style.display = show ? "" : "none";
+}
+document.getElementById("payment-mode").addEventListener("change", syncPaymentRefUI);
+document.querySelector('select[name="bill_type"]').addEventListener('change', syncBillTypeUI);
+syncBillTypeUI();
+syncPaymentRefUI();
+
+async function loadCustomer() {
+  const id = document.getElementById("customer-select").value;
+  const ctx = document.getElementById("customer-context");
+  if (!id) { ctx.innerHTML = ""; return; }
+  const res = await fetch(`{{ url_for('api.customer_billing_context', cid=0) }}`.replace('/0/', `/${id}/`));
+  const data = await res.json();
+  document.getElementById("customer-name").value = data.name;
+  const pts = data.loyalty_points || 0;
+  document.getElementById("loyalty-redeem-row").style.display = pts > 0 ? '' : 'none';
+  document.getElementById("loyalty-redeem").max = pts;
+  document.getElementById("loyalty-hint").textContent = pts > 0 ? `${pts} points available` : '';
+  ctx.innerHTML = `<strong>Regular:</strong> ${data.regular.map(r=>r.name).join(', ') || '—'} · <strong>Recent:</strong> ${data.history.map(h=>h.number).join(', ')} · <strong>Loyalty:</strong> ${pts} pts`;
+  data.regular.forEach(r => {
+    const item = {{ items|map(attribute='id')|list|tojson }};
+    // user can tap favourites above
+  });
+}
+
+document.getElementById("item-search").addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const code = e.target.value.trim();
+    if (!code) return;
+    const res = await fetch(`{{ url_for('api.barcode_lookup', code='BARCODE') }}`.replace('BARCODE', encodeURIComponent(code)));
+    if (res.ok) {
+      const i = await res.json();
+      addItem(i.id, i.name, i.mrp, i.in_stock);
+    }
+  }
+});
+
+document.getElementById("item-search").addEventListener("input", async (e) => {
+  const q = e.target.value.trim();
+  if (q.length < 2) return;
+  const res = await fetch(`{{ url_for('api.search_items') }}?q=${encodeURIComponent(q)}`);
+  const items = await res.json();
+  document.getElementById("search-results").innerHTML = items.map(i =>
+    `<div style="padding:0.5rem;cursor:pointer;border-bottom:1px solid var(--border)" onclick="addItem(${i.id}, '${i.name.replace(/'/g,"\\'")}', ${i.mrp}, ${i.in_stock})">
+      ${i.name} — ₹${i.mrp} <small style="color:var(--muted)">stock: ${i.in_stock}</small>
+    </div>`
+  ).join("");
+});
+
+function addItem(id, name, mrp, stock) {
+  if (stock <= 0) { alert("No consignment stock for this item"); return; }
+  lines.push({ item_id: id, name, qty: 1, rate: mrp, discount: 0 });
+  renderLines();
+  document.getElementById("item-search").value = "";
+  document.getElementById("search-results").innerHTML = "";
+}
+
+function renderLines() {
+  const tbody = document.querySelector("#lines-table tbody");
+  tbody.innerHTML = lines.map((l, i) => `
+    <tr>
+      <td>${l.name}</td>
+      <td><input type="number" min="0.001" step="0.001" value="${l.qty}" onchange="lines[${i}].qty=parseFloat(this.value);updateTotal()"></td>
+      <td><input type="number" step="0.01" value="${l.rate}" onchange="lines[${i}].rate=parseFloat(this.value);updateTotal()"></td>
+      <td><button type="button" onclick="lines.splice(${i},1);renderLines()">×</button></td>
+    </tr>`).join("");
+  document.getElementById("lines-json").value = JSON.stringify(lines.map(({item_id, qty, rate, discount}) => ({item_id, qty, rate, discount})));
+  updateTotal();
+}
+
+function updateTotal() {
+  const total = lines.reduce((s, l) => s + l.qty * l.rate, 0);
+  document.getElementById("total-display").textContent = "₹" + total.toFixed(2);
+}
+
+document.getElementById("bill-form").addEventListener("submit", (e) => {
+  if (!lines.length) { e.preventDefault(); alert("Add at least one item"); }
+});
+</script>
+{% endblock %}

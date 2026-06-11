@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Patients</h2>
+  <a class="btn btn-primary" href="{{ url_for('patients.new') }}">Add Patient</a>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>UHID</th><th>Ward</th><th>Phone</th></tr></thead>
+    <tbody>
+      {% for p in rows %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.uhid or '—' }}</td>
+        <td>{{ p.ward or '—' }}</td>
+        <td>{{ p.phone or '—' }}</td>
+      </tr>
+      {% else %}<tr><td colspan="4">No patients yet</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

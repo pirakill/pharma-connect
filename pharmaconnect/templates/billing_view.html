@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Bill {{ bill.number }}{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <h2>GST Tax Invoice — {{ bill.number }}</h2>
+  <div>
+    <button class="btn btn-secondary" onclick="window.print()">Print</button>
+    <a class="btn btn-secondary no-print" href="{{ url_for('billing.einvoice_export', bid=bill.id) }}">E-invoice JSON</a>
+    {% if not bill.irn %}
+    <form class="no-print" method="post" action="{{ url_for('billing.generate_irn', bid=bill.id) }}" style="display:inline">
+      <button class="btn btn-secondary" type="submit">Generate IRN</button>
+    </form>
+    {% endif %}
+    <a class="btn btn-secondary no-print" href="{{ whatsapp_url }}" target="_blank" rel="noopener">Share on WhatsApp</a>
+    {% if eway_required %}
+    <a class="btn btn-secondary no-print" href="{{ url_for('billing.eway_export', bid=bill.id) }}">E-way JSON</a>
+    {% endif %}
+    {% if can_return %}<a class="btn btn-secondary" href="{{ url_for('returns.new', bid=bill.id) }}">Sales Return</a>{% endif %}
+  </div>
+</div>
+
+<div class="card challan-doc">
+  <div class="grid grid-2">
+    <div>
+      <strong>{{ bill.facility.name }}</strong><br>
+      GSTIN: {{ bill.facility.gstin or '—' }}<br>
+      DL: {{ bill.facility.drug_license or '—' }}
+    </div>
+    <div style="text-align:right">
+      <div id="invoice-qr" style="display:inline-block;margin-bottom:0.5rem"></div>
+      <div>Date: {{ bill.billed_on.strftime('%d-%b-%Y %H:%M') }}<br>
+      Type: {{ bill.bill_type }}<br>
+      Payment: {{ bill.payment_mode }}{% if bill.payment_ref %} ({{ bill.payment_ref }}){% endif %}
+      {% if bill.irn %}<br>IRN: {{ bill.irn }}{% endif %}
+      {% if bill.order_ref %}<br>PO/Ref: {{ bill.order_ref }}{% endif %}</div>
+    </div>
+  </div>
+  <p><strong>Bill To:</strong> {{ bill.customer_name }}
+    {% if bill.customer_gstin %} ({{ bill.customer_gstin }}){% endif %}
+    {% if bill.doctor_name %}<br><strong>Doctor:</strong> {{ bill.doctor_name }}{% endif %}
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Item</th><th>HSN</th><th>GST%</th><th>Batch</th><th>Qty</th><th>Rate</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      {% for l in bill.lines %}
+      <tr>
+        <td>{{ l.item.name }}</td>
+        <td>{{ l.item.hsn or '—' }}</td>
+        <td>{% if l.item.tax_slab %}{{ l.item.tax_slab.rate }}%{% else %}—{% endif %}</td>
+        <td>{{ l.batch.batch_no }}</td>
+        <td>{{ l.qty }}</td>
+        <td>₹{{ l.rate }}</td>
+        <td>₹{{ l.taxable }}</td>
+        <td>₹{{ l.cgst }}</td>
+        <td>₹{{ l.sgst }}</td>
+        <td>₹{{ l.igst }}</td>
+        <td>₹{{ l.line_total }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><td colspan="6" style="text-align:right"><strong>Subtotal</strong></td><td colspan="5">₹{{ bill.subtotal }}</td></tr>
+      <tr><td colspan="6" style="text-align:right">Discount</td><td colspan="5">₹{{ bill.discount }}</td></tr>
+      <tr><td colspan="6" style="text-align:right">Taxable</td><td colspan="5">₹{{ bill.taxable }}</td></tr>
+      <tr><td colspan="6" style="text-align:right">CGST / SGST / IGST</td><td colspan="5">₹{{ bill.cgst }} / ₹{{ bill.sgst }} / ₹{{ bill.igst }}</td></tr>
+      <tr><td colspan="6" style="text-align:right"><strong>Grand Total</strong></td><td colspan="5"><strong>₹{{ bill.grand_total }}</strong></td></tr>
+    </tfoot>
+  </table>
+  {% if eway_required %}
+  <div class="no-print" style="margin-top:1rem;padding:0.75rem;border:1px solid var(--border);border-radius:8px">
+    <strong>E-way bill required</strong> (invoice ≥ ₹50,000)
+    <form method="post" action="{{ url_for('billing.set_eway', bid=bill.id) }}" style="display:flex;gap:0.5rem;margin-top:0.5rem;align-items:center">
+      <input name="eway_no" value="{{ bill.eway_no or '' }}" placeholder="12-digit e-way number">
+      <button class="btn btn-secondary" type="submit">Save E-way No</button>
+    </form>
+    {% if bill.eway_no %}<p style="color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0">E-way: {{ bill.eway_no }}</p>{% endif %}
+  </div>
+  {% endif %}
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:1rem">
+    Scan QR for invoice verification. Consignment settlement: facilities are auto-charged at PTR when this bill is posted.
+  </p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+new QRCode(document.getElementById("invoice-qr"), {
+  text: {{ qr_payload|tojson }},
+  width: 120,
+  height: 120,
+  colorDark: "#111111",
+  colorLight: "#ffffff",
+  correctLevel: QRCode.CorrectLevel.M
+});
+</script>
+{% endblock %}

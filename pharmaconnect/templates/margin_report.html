@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Margin Report{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Gross Margin Report</h2>
+  <form method="get" style="display:flex;gap:0.5rem;align-items:center">
+    <label>Last <input name="days" type="number" value="{{ days }}" min="1" max="365" style="width:4rem"> days</label>
+    <button class="btn btn-secondary" type="submit">Apply</button>
+  </form>
+</div>
+<div class="grid grid-4" style="margin-bottom:1rem">
+  <div class="card"><h3>Revenue (taxable)</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.revenue) }}</div></div>
+  <div class="card"><h3>COGS</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.cogs) }}</div></div>
+  <div class="card"><h3>Gross Profit</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.gross_profit) }}</div></div>
+  <div class="card"><h3>Margin %</h3><div class="kpi-value">{{ "{:.1f}".format(data.margin_pct) }}%</div></div>
+</div>
+<div class="card">
+  <h3>Item-wise Margin</h3>
+  <table>
+    <thead><tr><th>Code</th><th>Item</th><th>Revenue</th><th>COGS</th><th>Profit</th><th>Margin %</th></tr></thead>
+    <tbody>
+      {% for i in data.breakdown %}
+      <tr>
+        <td>{{ i.code }}</td>
+        <td>{{ i.name }}</td>
+        <td>₹{{ "{:,.2f}".format(i.revenue) }}</td>
+        <td>₹{{ "{:,.2f}".format(i.cogs) }}</td>
+        <td>₹{{ "{:,.2f}".format(i.profit) }}</td>
+        <td>{{ "{:.1f}".format(i.margin_pct) }}%</td>
+      </tr>
+      {% else %}<tr><td colspan="6">No sales in this period</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infivita PharmaConnect — Better than ShelfCure for Distributors</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body class="landing-body">
+  <nav class="landing-nav">
+    <strong style="color:var(--accent)">Infivita PharmaConnect</strong>
+    <div>
+      <a href="{{ url_for('landing.features') }}">Features</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="margin-left:1rem">Login</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <p class="hero-tag">Beyond ShelfCure — built for distributors</p>
+    <h1>Live stock across all pharmacies.<br>Auto billing. Auto GST. Auto restock.</h1>
+    <p class="hero-sub">Infivita Pharmaceuticals platform — consignment stock visibility, per-facility min/max alerts, settlement auto-charge, hospital + retail billing, GSTR-1/3B.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}">Open Dashboard</a>
+      <a class="btn btn-secondary btn-lg" href="{{ url_for('landing.features') }}">Compare Features</a>
+    </div>
+  </section>
+
+  <section class="stats grid grid-4">
+    <div class="card"><h3>Live Facilities</h3><div class="kpi-value">2+</div><small>Real-time stock sync</small></div>
+    <div class="card"><h3>Consignment</h3><div class="kpi-value">100%</div><small>Auto PTR settlement on sale</small></div>
+    <div class="card"><h3>GST Ready</h3><div class="kpi-value">GSTR-1/3B</div><small>CGST/SGST/IGST split</small></div>
+    <div class="card"><h3>Restock Alerts</h3><div class="kpi-value">Min/Max</div><small>Per pharmacy & hospital</small></div>
+  </section>
+
+  <section class="compare card">
+    <h2>Why Infivita beats ShelfCure for your business</h2>
+    <table>
+      <thead><tr><th>Capability</th><th>Infivita PharmaConnect</th><th>ShelfCure</th></tr></thead>
+      <tbody>
+        <tr><td>Multi-facility live stock (distributor view)</td><td style="color:var(--success)">✓ Built-in</td><td>✗ Single store</td></tr>
+        <tr><td>Consignment + auto settlement</td><td style="color:var(--success)">✓ PTR auto-charge</td><td>✗ Not designed for C&F</td></tr>
+        <tr><td>Per-facility min/max restock</td><td style="color:var(--success)">✓ Separate limits</td><td>Generic reorder</td></tr>
+        <tr><td>Hospital + Retail + Institutional billing</td><td style="color:var(--success)">✓ All 3 modes</td><td>Retail focused</td></tr>
+        <tr><td>GST invoices + GSTR-1 + GSTR-3B</td><td style="color:var(--success)">✓</td><td>✓</td></tr>
+        <tr><td>Sales returns with GST reversal</td><td style="color:var(--success)">✓</td><td>✓</td></tr>
+        <tr><td>Customer credit + regular medicines</td><td style="color:var(--success)">✓</td><td>✓</td></tr>
+        <tr><td>Barcode POS + favourites</td><td style="color:var(--success)">✓</td><td>✓</td></tr>
+        <tr><td>Expiry & dead stock reports</td><td style="color:var(--success)">✓</td><td>✓</td></tr>
+        <tr><td>AI invoice OCR scan</td><td>Coming soon</td><td style="color:var(--accent2)">✓ Gemini AI</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="landing-footer">Infivita Pharmaceuticals · GSTIN 36AHEPD1696A4Z0 · Telangana</footer>
+</body>
+</html>

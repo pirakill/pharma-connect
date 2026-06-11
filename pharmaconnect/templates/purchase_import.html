@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Import Purchases{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Import Purchase Bills (CSV)</h2>
+  <a class="btn btn-secondary" href="{{ url_for('purchase.import_template') }}">Download Template</a>
+</div>
+<div class="grid grid-2">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      <div class="form-row">
+        <label>CSV file</label>
+        <input type="file" name="file" accept=".csv,text/csv">
+      </div>
+      <p style="color:var(--muted);font-size:0.85rem">Or paste CSV below</p>
+      <div class="form-row">
+        <textarea name="csv_text" rows="12" placeholder="supplier_code,invoice_no,item_code,batch_no,expiry,qty,rate,mrp,warehouse_code,rack"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Import</button>
+      <a class="btn btn-secondary" href="{{ url_for('purchase.index') }}">Cancel</a>
+    </form>
+    <p style="color:var(--muted);font-size:0.9rem;margin-top:1rem">
+      Rows are grouped by supplier_code + invoice_no into one purchase bill each.
+      Expiry: YYYY-MM-DD or DD-MM-YYYY. warehouse_code optional (distributor).
+    </p>
+  </div>
+  {% if result %}
+  <div class="card">
+    <h3>Import Result</h3>
+    <p>Created: {{ result.created }} · Skipped: {{ result.skipped }}</p>
+    {% if result.errors %}
+    <ul style="color:var(--danger)">
+      {% for e in result.errors %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

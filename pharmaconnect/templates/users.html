@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Team Users{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Team Users</h2>
+  <a class="btn btn-secondary" href="{{ url_for('settings.profile') }}">My Profile</a>
+</div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Add User</h3>
+    <form method="post">
+      <input type="hidden" name="action" value="create">
+      <div class="form-row"><label>Username</label><input name="username" required placeholder="e.g. retail2"></div>
+      <div class="form-row"><label>Full name</label><input name="full_name" required></div>
+      <div class="form-row"><label>Role</label>
+        <select name="role_code" required>
+          {% for r in roles %}<option value="{{ r.code }}">{{ r.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-row"><label>Password</label><input name="password" type="password" required minlength="4"></div>
+      <button class="btn btn-primary" type="submit">Create User</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Users in {{ current_user.organization.name }}</h3>
+    <table>
+      <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for u in rows %}
+        <tr>
+          <td>{{ u.username }}{% if u.id == current_user.id %} <span style="color:var(--muted)">(you)</span>{% endif %}</td>
+          <td>{{ u.full_name }}</td>
+          <td>{{ u.role.name }}</td>
+          <td>{{ 'Active' if u.is_active else 'Inactive' }}</td>
+          <td style="display:flex;gap:0.35rem;flex-wrap:wrap">
+            {% if u.id != current_user.id %}
+            <form method="post" style="display:inline">
+              <input type="hidden" name="action" value="toggle">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <button class="btn btn-secondary" type="submit">{{ 'Deactivate' if u.is_active else 'Activate' }}</button>
+            </form>
+            <form method="post" style="display:inline-flex;gap:0.25rem;align-items:center">
+              <input type="hidden" name="action" value="reset_password">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <input name="password" type="password" placeholder="New pwd" minlength="4" required style="width:6rem">
+              <button class="btn btn-secondary" type="submit">Reset</button>
+            </form>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% else %}<tr><td colspan="5">No users</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Stock Limits{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Min / Max Stock Limits</h2>
+  <a class="btn btn-secondary" href="{{ url_for('inventory.restock') }}">View Restock Alerts</a>
+</div>
+
+<div class="card" style="margin-bottom:1rem">
+  <p style="color:var(--muted)">Set separate min and max stock for each medicine at each facility. When stock hits min, it appears on Restock Alerts.</p>
+  <form method="get" class="form-inline">
+    <div class="form-row">
+      <label>Facility</label>
+      <select name="facility_id" onchange="this.form.submit()">
+        {% for f in facilities %}
+        <option value="{{ f.id }}" {% if f.id == facility_id %}selected{% endif %}>{{ f.name }} ({{ f.kind }})</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <form method="post">
+    <input type="hidden" name="facility_id" value="{{ facility_id }}">
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Code</th><th>Current Stock</th><th>Min Qty</th><th>Max Qty</th></tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        {% set lim = existing.get(item.id) %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.code }}</td>
+          <td>{{ stock_map.get(item.id, 0) }}</td>
+          <td><input name="min_{{ item.id }}" type="number" step="0.001" min="0"
+                     value="{{ lim.min_qty if lim else '' }}" placeholder="e.g. 50" style="width:100px"></td>
+          <td><input name="max_{{ item.id }}" type="number" step="0.001" min="0"
+                     value="{{ lim.max_qty if lim else '' }}" placeholder="e.g. 200" style="width:100px"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button class="btn btn-primary" type="submit" style="margin-top:1rem">Save Limits</button>
+  </form>
+</div>
+{% endblock %}

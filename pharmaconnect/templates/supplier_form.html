@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:480px">
+  <h2>Add Supplier</h2>
+  <form method="post">
+    <div class="form-row"><label>Code</label><input name="code" required></div>
+    <div class="form-row"><label>Name</label><input name="name" required></div>
+    <div class="form-row"><label>GSTIN</label><input name="gstin"></div>
+    <div class="form-row"><label>Phone</label><input name="phone"></div>
+    <button class="btn btn-primary" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}

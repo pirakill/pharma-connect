@@ -118,4 +118,5 @@ def test_distributor_reports_hub_kpis(app):
         resp = client.get("/reports/")
         assert resp.status_code == 200
         assert b"30-Day Network Sales" in resp.data
+        assert b"Report Catalogue" in resp.data
         assert b"Consignment Value" in resp.data

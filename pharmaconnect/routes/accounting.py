@@ -95,6 +95,8 @@ def party_new():
             current_user.org_id,
             request.form.get("party_name", ""),
             request.form.get("party_gstin") or None,
+            credit_days=int(request.form.get("credit_days") or 30),
+            credit_limit=Decimal(request.form.get("credit_limit") or 0),
         )
         db.session.commit()
         flash("Party added", "success")

@@ -84,11 +84,20 @@ def create_sale_return(bill: Bill, lines: list[dict], reason: str = "") -> SaleR
         )
     )
 
-    if bill.payment_mode == "CREDIT" and bill.bill_type == "INSTITUTIONAL" and bill.customer_name:
-        ledger = PartyLedger.query.filter_by(org_id=bill.facility_id, party_name=bill.customer_name).first()
-        if ledger:
-            ledger.outstanding = max(Decimal(str(ledger.outstanding or 0)) - sr.grand_total, Decimal("0"))
-            from datetime import datetime
-            ledger.last_txn_on = datetime.utcnow()
+    if bill.payment_mode == "CREDIT":
+        from .credit import reduce_bill_balance
+        from ..models import RetailCustomer
+
+        reduce_bill_balance(bill, sr.grand_total)
+        if bill.retail_customer_id:
+            rc = db.session.get(RetailCustomer, bill.retail_customer_id)
+            if rc:
+                rc.outstanding = max(Decimal(str(rc.outstanding or 0)) - sr.grand_total, Decimal("0"))
+        elif bill.bill_type == "INSTITUTIONAL" and bill.customer_name:
+            ledger = PartyLedger.query.filter_by(org_id=bill.facility_id, party_name=bill.customer_name).first()
+            if ledger:
+                ledger.outstanding = max(Decimal(str(ledger.outstanding or 0)) - sr.grand_total, Decimal("0"))
+                from datetime import datetime
+                ledger.last_txn_on = datetime.utcnow()
 
     return sr

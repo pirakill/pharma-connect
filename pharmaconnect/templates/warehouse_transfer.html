@@ -24,13 +24,13 @@
           {% endfor %}
         </select>
       </div>
-      <div class="form-row" style="flex:2">
+      <div class="form-row flex-2">
         <label>Note</label>
         <input name="note" placeholder="Optional">
       </div>
     </div>
 
-    <div class="form-row" style="margin:1rem 0">
+    <div class="form-row my-1">
       <label>Pick from source stock</label>
       <select id="batch-pick" onchange="addFromBatch()">
         <option value="">— Select batch to add —</option>
@@ -44,7 +44,7 @@
       <tbody></tbody>
     </table>
     <button type="button" class="btn btn-secondary" onclick="addLine()">+ Add line</button>
-    <button type="submit" class="btn btn-primary" style="margin-left:0.5rem">Post Transfer</button>
+    <button type="submit" class="btn btn-primary ml-1">Post Transfer</button>
   </form>
 </div>
 {% endblock %}

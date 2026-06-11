@@ -1,24 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Login — {{ APP_NAME }}{% endblock %}
+{% block title %}Sign in — {{ APP_NAME }}{% endblock %}
 {% block content %}
 <div class="login-wrap">
   <div class="card login-card">
-    <h2 style="margin-top:0">Infivita Pharmaceuticals</h2>
-    <p style="color:var(--muted)">GSTIN 36AHEPD1696A4Z0 · Telangana<br>Consignment stock · Live visibility · Billing · GST</p>
+    <h2 class="login-logo">{{ APP_NAME }}</h2>
+    <p class="login-tagline">Consignment ERP · GST billing · Live inventory</p>
     <form method="post">
       <div class="form-row">
         <label>Username</label>
-        <input name="username" required autofocus>
+        <input name="username" required autofocus autocomplete="username">
       </div>
       <div class="form-row">
         <label>Password</label>
-        <input name="password" type="password" required>
+        <input name="password" type="password" required autocomplete="current-password">
       </div>
-      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Sign in</button>
     </form>
-    <p style="color:var(--muted);font-size:0.8rem;margin-top:1rem">
-      <code>distributor / admin</code> · <code>retail1 / admin</code> · <code>hospital1 / admin</code>
-    </p>
+    <div class="login-hint">
+      <span class="text-sub">Demo access</span>
+      <code>distributor / admin</code>
+      <code>retail1 / admin</code>
+    </div>
   </div>
 </div>
 {% endblock %}

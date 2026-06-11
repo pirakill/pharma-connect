@@ -3,7 +3,10 @@
 {% block content %}
 <div class="topbar">
   <h2>New {{ bill_type }} Bill</h2>
-  <a class="btn btn-secondary" href="{{ url_for('billing.index') }}">All Bills</a>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{{ url_for('billing.pos') }}">Mobile POS</a>
+    <a class="btn btn-secondary" href="{{ url_for('billing.index') }}">All Bills</a>
+  </div>
 </div>
 
 <form method="post" class="pos-layout" id="bill-form">
@@ -26,7 +29,7 @@
           {% endfor %}
         </select>
       </div>
-      <div class="form-row" id="institutional-party-row" style="display:none">
+      <div class="form-row hidden" id="institutional-party-row">
         <label>Institutional Party</label>
         <select id="party-select" onchange="loadParty()">
           <option value="">— Select party —</option>
@@ -45,7 +48,7 @@
         <label>GSTIN (B2B)</label>
         <input name="customer_gstin" id="customer-gstin" placeholder="29AAAAA0000A1Z5">
       </div>
-      <div class="form-row" id="order-ref-row" style="display:none">
+      <div class="form-row hidden" id="order-ref-row">
         <label>PO / Order Ref</label>
         <input name="order_ref" id="order-ref" placeholder="PO-2026-001">
       </div>
@@ -58,7 +61,7 @@
           <option value="CREDIT">Credit</option>
         </select>
       </div>
-      <div class="form-row" id="payment-ref-row" style="display:none">
+      <div class="form-row hidden" id="payment-ref-row">
         <label>UPI / Card Reference</label>
         <input name="payment_ref" id="payment-ref" placeholder="Txn ID / last 4 digits">
       </div>
@@ -82,25 +85,25 @@
     {% endif %}
 
     {% if favourites %}
-    <div style="margin-bottom:0.75rem">
-      <label style="color:var(--muted);font-size:0.85rem">Favourites</label>
-      <div style="display:flex;flex-wrap:wrap;gap:0.35rem">
+    <div class="mb-1">
+      <span class="chip-label">Favourites</span>
+      <div class="chip-group">
         {% for f in favourites %}
-        <button type="button" class="btn btn-secondary" style="font-size:0.8rem;padding:0.35rem 0.6rem"
+        <button type="button" class="btn btn-secondary btn-sm"
           onclick="addItem({{ f.item.id }}, '{{ f.item.name|replace("'", "\\'") }}', {{ f.item.mrp }}, {{ stock_map.get(f.item.id, 0) }})">{{ f.item.name }}</button>
         {% endfor %}
       </div>
     </div>
     {% endif %}
     {% if schemes %}
-    <p style="color:var(--accent);font-size:0.85rem">Active offers: {% for s in schemes %}{{ s.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    <p class="scheme-banner">Active offers: {% for s in schemes %}{{ s.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
     {% endif %}
     <div class="form-row">
       <label>Search or scan barcode</label>
       <input id="item-search" placeholder="Medicine name or barcode..." autocomplete="off">
     </div>
-    <div id="customer-context" style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem"></div>
-    <div id="search-results" style="max-height:160px;overflow:auto"></div>
+    <div id="customer-context" class="customer-context"></div>
+    <div id="search-results" class="search-results"></div>
 
     <table class="pos-lines" id="lines-table">
       <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th></th></tr></thead>
@@ -114,13 +117,13 @@
       <label>Bill Discount (₹)</label>
       <input name="discount" type="number" step="0.01" value="0">
     </div>
-    <div class="form-row" id="loyalty-redeem-row" style="display:none">
+    <div class="form-row hidden" id="loyalty-redeem-row">
       <label>Redeem Loyalty Points (1 pt = ₹1)</label>
       <input name="loyalty_redeem" id="loyalty-redeem" type="number" min="0" step="1" value="0">
-      <small id="loyalty-hint" style="color:var(--muted)"></small>
+      <small id="loyalty-hint" class="text-muted"></small>
     </div>
     <div class="pos-total" id="total-display">₹0.00</div>
-    <button class="btn btn-primary btn-block" type="submit" style="margin-top:1rem">Post Bill & Print</button>
+    <button class="btn btn-primary btn-block mt-1" type="submit">Post Bill & Print</button>
   </div>
 </form>
 {% endblock %}
@@ -129,12 +132,16 @@
 const stockMap = {{ stock_map|tojson }};
 const lines = [];
 
+function setRowVisible(id, visible) {
+  document.getElementById(id).classList.toggle('hidden', !visible);
+}
+
 function syncBillTypeUI() {
   const billType = document.querySelector('select[name="bill_type"]').value;
   const isInst = billType === 'INSTITUTIONAL';
-  document.getElementById('retail-customer-row').style.display = isInst ? 'none' : '';
-  document.getElementById('institutional-party-row').style.display = isInst ? '' : 'none';
-  document.getElementById('order-ref-row').style.display = isInst ? '' : 'none';
+  setRowVisible('retail-customer-row', !isInst);
+  setRowVisible('institutional-party-row', isInst);
+  setRowVisible('order-ref-row', isInst);
   if (isInst) {
     document.getElementById('payment-mode').value = 'CREDIT';
     if (!document.getElementById('customer-name').value || document.getElementById('customer-name').value === 'Walk-in') {
@@ -154,7 +161,7 @@ function loadParty() {
 function syncPaymentRefUI() {
   const mode = document.getElementById("payment-mode").value;
   const show = mode === "UPI" || mode === "CARD";
-  document.getElementById("payment-ref-row").style.display = show ? "" : "none";
+  setRowVisible("payment-ref-row", show);
 }
 document.getElementById("payment-mode").addEventListener("change", syncPaymentRefUI);
 document.querySelector('select[name="bill_type"]').addEventListener('change', syncBillTypeUI);
@@ -169,10 +176,13 @@ async function loadCustomer() {
   const data = await res.json();
   document.getElementById("customer-name").value = data.name;
   const pts = data.loyalty_points || 0;
-  document.getElementById("loyalty-redeem-row").style.display = pts > 0 ? '' : 'none';
+  setRowVisible("loyalty-redeem-row", pts > 0);
   document.getElementById("loyalty-redeem").max = pts;
   document.getElementById("loyalty-hint").textContent = pts > 0 ? `${pts} points available` : '';
-  ctx.innerHTML = `<strong>Regular:</strong> ${data.regular.map(r=>r.name).join(', ') || '—'} · <strong>Recent:</strong> ${data.history.map(h=>h.number).join(', ')} · <strong>Loyalty:</strong> ${pts} pts`;
+  let creditLine = `Credit: ${data.credit_days || 0} days`;
+  if (data.outstanding > 0) creditLine += ` · Due ₹${data.outstanding}`;
+  if (data.overdue > 0) creditLine += ` · <span class="cell-danger">Overdue ₹${data.overdue}</span>`;
+  ctx.innerHTML = `${creditLine} · <strong>Regular:</strong> ${data.regular.map(r=>r.name).join(', ') || '—'} · <strong>Recent:</strong> ${data.history.map(h=>h.number).join(', ')} · <strong>Loyalty:</strong> ${pts} pts`;
   data.regular.forEach(r => {
     const item = {{ items|map(attribute='id')|list|tojson }};
     // user can tap favourites above
@@ -198,8 +208,8 @@ document.getElementById("item-search").addEventListener("input", async (e) => {
   const res = await fetch(`{{ url_for('api.search_items') }}?q=${encodeURIComponent(q)}`);
   const items = await res.json();
   document.getElementById("search-results").innerHTML = items.map(i =>
-    `<div style="padding:0.5rem;cursor:pointer;border-bottom:1px solid var(--border)" onclick="addItem(${i.id}, '${i.name.replace(/'/g,"\\'")}', ${i.mrp}, ${i.in_stock})">
-      ${i.name} — ₹${i.mrp} <small style="color:var(--muted)">stock: ${i.in_stock}</small>
+    `<div class="search-hit" onclick="addItem(${i.id}, '${i.name.replace(/'/g,"\\'")}', ${i.mrp}, ${i.in_stock})">
+      ${i.name} — ₹${i.mrp} <span class="text-sub">stock: ${i.in_stock}</span>
     </div>`
   ).join("");
 });

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="topbar no-print">
   <h2>Credit Note — {{ doc.number }}</h2>
-  <div>
+  <div class="topbar-actions">
     <button class="btn btn-primary" onclick="window.print()">Print Credit Note</button>
     <a class="btn btn-secondary" href="{{ url_for('returns.index') }}">All Returns</a>
     <a class="btn btn-secondary" href="{{ url_for('billing.view', bid=doc.bill_id) }}">Original Invoice</a>
@@ -18,8 +18,8 @@
       GSTIN: {{ doc.facility.gstin or '—' }}<br>
       DL: {{ doc.facility.drug_license or '—' }}
     </div>
-    <div style="text-align:right">
-      <div id="invoice-qr" style="display:inline-block;margin-bottom:0.5rem"></div>
+    <div class="text-right">
+      <div id="invoice-qr" class="invoice-qr"></div>
       <strong>Credit Note #:</strong> {{ doc.number }}<br>
       <strong>Date:</strong> {{ doc.returned_on.strftime('%d-%b-%Y %H:%M') }}<br>
       <strong>Against Invoice:</strong> {{ doc.bill.number }}<br>
@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <p style="margin-top:1rem">
+  <p class="mt-1">
     <strong>Party:</strong> {{ doc.bill.customer_name }}
     {% if doc.bill.customer_gstin %} ({{ doc.bill.customer_gstin }}){% endif %}
   </p>
@@ -53,13 +53,13 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      <tr><td colspan="4" style="text-align:right">Taxable</td><td colspan="5">₹{{ doc.taxable }}</td></tr>
-      <tr><td colspan="4" style="text-align:right">CGST / SGST / IGST</td><td colspan="5">₹{{ doc.cgst }} / ₹{{ doc.sgst }} / ₹{{ doc.igst }}</td></tr>
-      <tr><td colspan="4" style="text-align:right"><strong>Credit Amount</strong></td><td colspan="5"><strong>₹{{ doc.grand_total }}</strong></td></tr>
+      <tr><td colspan="4" class="text-right">Taxable</td><td colspan="5">₹{{ doc.taxable }}</td></tr>
+      <tr><td colspan="4" class="text-right">CGST / SGST / IGST</td><td colspan="5">₹{{ doc.cgst }} / ₹{{ doc.sgst }} / ₹{{ doc.igst }}</td></tr>
+      <tr><td colspan="4" class="text-right"><strong>Credit Amount</strong></td><td colspan="5"><strong>₹{{ doc.grand_total }}</strong></td></tr>
     </tfoot>
   </table>
 
-  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+  <p class="doc-footer-note">
     Scan QR for credit note verification. GST reversed per original tax invoice.
   </p>
 </div>

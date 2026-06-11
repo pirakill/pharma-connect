@@ -3,7 +3,7 @@
 {% block content %}
 <div class="topbar no-print">
   <h2>Supplier Debit Note — {{ doc.number }}</h2>
-  <div>
+  <div class="topbar-actions">
     <button class="btn btn-primary" onclick="window.print()">Print Debit Note</button>
     <a class="btn btn-secondary" href="{{ url_for('purchase.return_challan', prid=doc.id) }}">Return Challan</a>
     <a class="btn btn-secondary" href="{{ url_for('purchase.view', pid=doc.purchase_id) }}">Original Purchase</a>
@@ -17,8 +17,8 @@
       <strong>{{ doc.organization.name }}</strong><br>
       GSTIN: {{ doc.organization.gstin or '—' }}
     </div>
-    <div style="text-align:right">
-      <div id="invoice-qr" style="display:inline-block;margin-bottom:0.5rem"></div>
+    <div class="text-right">
+      <div id="invoice-qr" class="invoice-qr"></div>
       <strong>Debit Note #:</strong> {{ doc.number }}<br>
       <strong>Date:</strong> {{ doc.returned_on.strftime('%d-%b-%Y %H:%M') }}<br>
       <strong>Against Purchase:</strong> {{ doc.purchase.number }}<br>
@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  <p style="margin-top:1rem">
+  <p class="mt-1">
     <strong>Supplier:</strong> {{ doc.supplier.name }}
     {% if doc.supplier.gstin %} ({{ doc.supplier.gstin }}){% endif %}
   </p>
@@ -52,13 +52,13 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      <tr><td colspan="4" style="text-align:right">Taxable</td><td colspan="5">₹{{ doc.taxable }}</td></tr>
-      <tr><td colspan="4" style="text-align:right">CGST / SGST / IGST</td><td colspan="5">₹{{ doc.cgst }} / ₹{{ doc.sgst }} / ₹{{ doc.igst }}</td></tr>
-      <tr><td colspan="4" style="text-align:right"><strong>Debit Amount</strong></td><td colspan="5"><strong>₹{{ doc.grand_total }}</strong></td></tr>
+      <tr><td colspan="4" class="text-right">Taxable</td><td colspan="5">₹{{ doc.taxable }}</td></tr>
+      <tr><td colspan="4" class="text-right">CGST / SGST / IGST</td><td colspan="5">₹{{ doc.cgst }} / ₹{{ doc.sgst }} / ₹{{ doc.igst }}</td></tr>
+      <tr><td colspan="4" class="text-right"><strong>Debit Amount</strong></td><td colspan="5"><strong>₹{{ doc.grand_total }}</strong></td></tr>
     </tfoot>
   </table>
 
-  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+  <p class="doc-footer-note">
     Scan QR for debit note verification. Stock returned to supplier.
   </p>
 </div>

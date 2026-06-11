@@ -3,21 +3,26 @@
 {% block content %}
 <div class="topbar">
   <h2>Customers</h2>
-  <a class="btn btn-primary" href="{{ url_for('customers.new') }}">Add Customer</a>
+  <div class="topbar-actions">
+    <a class="btn btn-primary" href="{{ url_for('customers.new') }}">Add Customer</a>
+  </div>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
-    <thead><tr><th>Name</th><th>Phone</th><th>Outstanding</th><th>Loyalty</th><th></th></tr></thead>
+    <thead><tr><th>Name</th><th>Phone</th><th>Credit Days</th><th>Outstanding</th><th>Loyalty</th><th></th></tr></thead>
     <tbody>
       {% for c in rows %}
       <tr>
         <td>{{ c.name }}</td><td>{{ c.phone or '—' }}</td>
+        <td>{{ c.credit_days or 0 }}</td>
         <td>₹{{ "{:,.2f}".format(c.outstanding) }}</td>
         <td>{{ c.loyalty_points or 0 }} pts</td>
         <td><a href="{{ url_for('customers.view', cid=c.id) }}">Profile</a></td>
       </tr>
-      {% else %}<tr><td colspan="5">No customers yet</td></tr>{% endfor %}
+      {% else %}<tr><td colspan="6">No customers yet</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

@@ -3,9 +3,12 @@
 {% block content %}
 <div class="topbar">
   <h2>Promotions & Schemes</h2>
-  <a class="btn btn-primary" href="{{ url_for('schemes.new') }}">New Scheme</a>
+  <div class="topbar-actions">
+    <a class="btn btn-primary" href="{{ url_for('schemes.new') }}">New Scheme</a>
+  </div>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead>
       <tr><th>Name</th><th>Type</th><th>Value</th><th>Item</th><th>Valid</th><th>Status</th><th></th></tr>
@@ -25,7 +28,7 @@
         </td>
         <td>{{ 'Active' if s.is_active else 'Inactive' }}</td>
         <td>
-          <form method="post" action="{{ url_for('schemes.toggle', sid=s.id) }}" style="display:inline">
+          <form method="post" action="{{ url_for('schemes.toggle', sid=s.id) }}" class="inline-form">
             <button class="btn btn-secondary" type="submit">{{ 'Deactivate' if s.is_active else 'Activate' }}</button>
           </form>
         </td>
@@ -33,5 +36,6 @@
       {% else %}<tr><td colspan="7">No schemes yet</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

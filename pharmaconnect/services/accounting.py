@@ -7,6 +7,7 @@ from sqlalchemy import func
 
 from .. import db
 from ..models import AccountEntry, Bill, Organization, PartyLedger
+from .credit import record_party_payment
 
 
 def record_payment(org_id: int, party_name: str, amount: Decimal, note: str = "") -> AccountEntry:
@@ -20,10 +21,7 @@ def record_payment(org_id: int, party_name: str, amount: Decimal, note: str = ""
         note=note,
     )
     db.session.add(entry)
-    ledger = PartyLedger.query.filter_by(org_id=org_id, party_name=party_name).first()
-    if ledger:
-        ledger.outstanding = max(Decimal(str(ledger.outstanding or 0)) - amount, Decimal("0"))
-        ledger.last_txn_on = datetime.utcnow()
+    record_party_payment(org_id, party_name, amount)
     return entry
 
 
@@ -71,14 +69,26 @@ def list_parties(org_id: int) -> list[PartyLedger]:
     )
 
 
-def create_party(org_id: int, party_name: str, party_gstin: str | None = None) -> PartyLedger:
+def create_party(
+    org_id: int,
+    party_name: str,
+    party_gstin: str | None = None,
+    credit_days: int = 30,
+    credit_limit: Decimal = Decimal("0"),
+) -> PartyLedger:
     name = party_name.strip()
     if not name:
         raise ValueError("Party name is required")
     existing = PartyLedger.query.filter_by(org_id=org_id, party_name=name).first()
     if existing:
         raise ValueError("Party already exists")
-    ledger = PartyLedger(org_id=org_id, party_name=name, party_gstin=party_gstin or None)
+    ledger = PartyLedger(
+        org_id=org_id,
+        party_name=name,
+        party_gstin=party_gstin or None,
+        credit_days=max(int(credit_days or 0), 0),
+        credit_limit=credit_limit,
+    )
     db.session.add(ledger)
     db.session.flush()
     return ledger

@@ -15,6 +15,7 @@ class RetailCustomer(db.Model):
     gstin = db.Column(db.String(20))
     address = db.Column(db.String(255))
     credit_limit = db.Column(db.Numeric(12, 2), default=0)
+    credit_days = db.Column(db.Integer, default=30)
     outstanding = db.Column(db.Numeric(12, 2), default=0)
     loyalty_points = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

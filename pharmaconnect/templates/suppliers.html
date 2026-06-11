@@ -3,13 +3,14 @@
 {% block content %}
 <div class="topbar">
   <h2>Suppliers</h2>
-  <div>
+  <div class="topbar-actions">
     <a class="btn btn-secondary" href="{{ url_for('purchase.supplier_new') }}">Add Supplier</a>
     <a class="btn btn-secondary" href="{{ url_for('purchase.index') }}">Purchases</a>
     <a class="btn btn-primary" href="{{ url_for('purchase.new') }}">New Purchase</a>
   </div>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead><tr><th>Code</th><th>Name</th><th>GSTIN</th><th>Outstanding</th><th>Payment</th></tr></thead>
     <tbody>
@@ -21,10 +22,10 @@
         <td>₹{{ "{:,.2f}".format(s.outstanding) }}</td>
         <td>
           {% if s.outstanding > 0 %}
-          <form method="post" style="display:flex;gap:0.35rem;align-items:center">
+          <form method="post" class="inline-actions">
             <input type="hidden" name="supplier_id" value="{{ s.id }}">
-            <input name="amount" type="number" step="0.01" min="0.01" max="{{ s.outstanding }}" placeholder="Amount" style="width:6rem" required>
-            <input name="note" placeholder="Note" style="width:6rem">
+            <input name="amount" type="number" step="0.01" min="0.01" max="{{ s.outstanding }}" placeholder="Amount" class="input-sm-field" required>
+            <input name="note" placeholder="Note" class="input-sm-field">
             <button class="btn btn-secondary" type="submit">Pay</button>
           </form>
           {% else %}—{% endif %}
@@ -33,5 +34,6 @@
       {% else %}<tr><td colspan="5">No suppliers yet</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

@@ -5,7 +5,8 @@
   <h2>Warehouse Transfers</h2>
   <a class="btn btn-primary" href="{{ url_for('inventory.transfer') }}">New Transfer</a>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead>
       <tr><th>Transfer #</th><th>From</th><th>To</th><th>Date</th><th>Lines</th><th></th></tr>
@@ -25,5 +26,6 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

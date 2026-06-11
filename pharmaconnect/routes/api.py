@@ -101,13 +101,21 @@ def customer_billing_context(cid: int):
     c = db.session.get(RetailCustomer, cid)
     if not c:
         return jsonify({"error": "not found"}), 404
+    from ..services.credit import retail_credit_status
+
+    credit = retail_credit_status(cid)
     return jsonify({
         "id": c.id, "name": c.name, "gstin": c.gstin,
         "outstanding": float(c.outstanding or 0),
+        "credit_days": int(c.credit_days or 0),
+        "credit_limit": float(c.credit_limit or 0),
+        "overdue": credit.get("overdue", 0),
+        "oldest_due": credit.get("oldest_due"),
         "loyalty_points": int(c.loyalty_points or 0),
         "regular": [{"item_id": r.item_id, "name": r.item.name, "qty": float(r.typical_qty)} for r in customer_service.regular_meds_list(cid)],
         "frequent": customer_service.frequent_items(cid),
         "history": customer_service.customer_history(cid, limit=5),
+        "open_invoices": credit.get("open_invoices", []),
     })
 
 

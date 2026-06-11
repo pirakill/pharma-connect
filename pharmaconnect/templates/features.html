@@ -9,12 +9,13 @@
 </head>
 <body class="landing-body">
   <nav class="landing-nav">
-    <a href="{{ url_for('landing.welcome') }}"><strong style="color:var(--accent)">Infivita PharmaConnect</strong></a>
+    <a href="{{ url_for('landing.welcome') }}" class="nav-brand">Infivita PharmaConnect</a>
     <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
   </nav>
-  <div style="max-width:1100px;margin:2rem auto;padding:0 1.5rem">
+  <div class="features-page">
     <h1>7 modules — ShelfCure parity + distributor superpowers</h1>
-    <div class="grid grid-2" style="margin-top:2rem">
+    <p class="text-muted">Everything a pharmacy needs, plus consignment network control for distributors.</p>
+    <div class="grid grid-2 mt-1">
       {% for title, items in [
         ('Smart Billing', ['Retail/Hospital/Institutional POS', 'Barcode scan', 'Loyalty points', 'WhatsApp invoice share', 'Auto promotions', 'Sales returns']),
         ('Inventory Control', ['Live consignment stock', 'Batch + expiry + rack', 'Expired stock block', 'Write-off', 'Restock alerts', 'Challan on shipment']),
@@ -25,9 +26,9 @@
         ('Integrations & Ops', ['IRP / E-way / Razorpay / PhonePe config', 'IRN generation', 'SMS expiry alerts', 'Audit trail']),
         ('Distributor Only', ['Network dashboard', 'Multi-facility live view', 'Consignment ship', 'PTR auto-settlement']),
       ] %}
-      <div class="card">
+      <div class="card module-card">
         <h3>{{ title }}</h3>
-        <ul style="color:var(--muted);padding-left:1.2rem">
+        <ul>
           {% for i in items %}<li>{{ i }}</li>{% endfor %}
         </ul>
       </div>

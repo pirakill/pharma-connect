@@ -10,13 +10,13 @@
         {% for l in bill.lines %}
         <tr>
           <td>{{ l.item.name }}</td><td>{{ l.qty }}</td>
-          <td><input name="qty_{{ l.id }}" type="number" step="0.001" min="0" max="{{ l.qty }}" style="width:100px"></td>
+          <td><input name="qty_{{ l.id }}" type="number" step="0.001" min="0" max="{{ l.qty }}" class="input-qty"></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <div class="form-row" style="margin-top:1rem"><label>Reason</label><input name="reason"></div>
-    <p style="color:var(--muted);font-size:0.85rem">Consignment PTR settlement to Infivita will be reversed proportionally.</p>
+    <div class="form-row mt-1"><label>Reason</label><input name="reason"></div>
+    <p class="text-sub">Consignment PTR settlement to Infivita will be reversed proportionally.</p>
     <button class="btn btn-primary" type="submit">Post Return (GST + settlement reversed)</button>
   </form>
 </div>

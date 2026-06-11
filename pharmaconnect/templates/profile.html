@@ -5,11 +5,11 @@
 <div class="grid grid-2">
   <div class="card">
     <h3>Account</h3>
-    <p><strong>{{ current_user.full_name }}</strong></p>
-    <p style="color:var(--muted)">@{{ current_user.username }} · {{ current_user.role.name }}</p>
-    <p style="color:var(--muted)">{{ current_user.organization.name }}</p>
+    <p class="profile-name">{{ current_user.full_name }}</p>
+    <p class="profile-meta">@{{ current_user.username }} · {{ current_user.role.name }}</p>
+    <p class="profile-meta">{{ current_user.organization.name }}</p>
     {% if can('users_manage') %}
-    <a class="btn btn-secondary" href="{{ url_for('settings.users') }}">Manage Team</a>
+    <a class="btn btn-secondary mt-1" href="{{ url_for('settings.users') }}">Manage Team</a>
     {% endif %}
   </div>
   <div class="card">

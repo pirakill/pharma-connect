@@ -3,7 +3,7 @@
 {% block content %}
 <div class="topbar">
   <h2>Warehouses</h2>
-  <div>
+  <div class="topbar-actions">
     <a class="btn btn-secondary" href="{{ url_for('inventory.transfer') }}">Transfer Stock</a>
     <a class="btn btn-secondary" href="{{ url_for('inventory.transfers') }}">Transfer History</a>
     <a class="btn btn-primary" href="{{ url_for('purchase.new') }}">Record Purchase</a>
@@ -11,8 +11,8 @@
 </div>
 
 <div class="grid grid-2">
-  <div class="card">
-    <h3>Stock by Warehouse</h3>
+  <div class="card list-card">
+    <div class="table-wrap">
     <table>
       <thead>
         <tr><th>Code</th><th>Name</th><th>SKUs</th><th>Units</th><th>Value</th></tr>
@@ -31,6 +31,7 @@
         {% endfor %}
       </tbody>
     </table>
+    </div>
   </div>
 
   <div class="card">

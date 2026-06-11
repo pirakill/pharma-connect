@@ -3,15 +3,16 @@
 {% block content %}
 <div class="topbar">
   <h2>Digital Payment Register</h2>
-  <form method="get" style="display:flex;gap:0.5rem;align-items:center">
-    <label>Last <input name="days" type="number" value="{{ days }}" min="1" max="365" style="width:4rem"> days</label>
+  <form method="get" class="filter-inline">
+    <label>Last <input name="days" type="number" value="{{ days }}" min="1" max="365" class="input-narrow"> days</label>
     <button class="btn btn-secondary" type="submit">Apply</button>
   </form>
 </div>
-<div class="card" style="margin-bottom:1rem">
+<div class="card mb-1">
   <strong>Total UPI/Card collections:</strong> ₹{{ "{:,.2f}".format(total) }}
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead><tr><th>Date</th><th>Bill</th><th>Customer</th><th>Mode</th><th>Reference</th><th>Amount</th></tr></thead>
     <tbody>
@@ -27,5 +28,6 @@
       {% else %}<tr><td colspan="6">No UPI/Card payments in this period</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

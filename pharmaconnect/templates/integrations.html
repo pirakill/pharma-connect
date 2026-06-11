@@ -2,54 +2,56 @@
 {% block title %}Integrations{% endblock %}
 {% block content %}
 <div class="topbar"><h2>API Integrations</h2></div>
-<div class="grid grid-4" style="margin-bottom:1rem">
-  <div class="card"><h3>IRP</h3><div class="kpi-value" style="font-size:1rem;color:{% if status.irp %}var(--success){% else %}var(--muted){% endif %}">{{ 'Ready' if status.irp else 'Off' }}</div></div>
-  <div class="card"><h3>E-way</h3><div class="kpi-value" style="font-size:1rem;color:{% if status.eway %}var(--success){% else %}var(--muted){% endif %}">{{ 'Ready' if status.eway else 'Off' }}</div></div>
-  <div class="card"><h3>Razorpay</h3><div class="kpi-value" style="font-size:1rem;color:{% if status.razorpay %}var(--success){% else %}var(--muted){% endif %}">{{ 'Ready' if status.razorpay else 'Off' }}</div></div>
-  <div class="card"><h3>PhonePe</h3><div class="kpi-value" style="font-size:1rem;color:{% if status.phonepe %}var(--success){% else %}var(--muted){% endif %}">{{ 'Ready' if status.phonepe else 'Off' }}</div></div>
-  <div class="card"><h3>SMS</h3><div class="kpi-value" style="font-size:1rem;color:{% if status.sms %}var(--success){% else %}var(--muted){% endif %}">{{ 'Ready' if status.sms else 'Off' }}</div></div>
+
+<div class="grid grid-4 mb-1">
+  <div class="card kpi-card"><h3>IRP</h3><div class="kpi-value sm {% if status.irp %}status-on{% else %}status-off{% endif %}">{{ 'Ready' if status.irp else 'Off' }}</div></div>
+  <div class="card kpi-card"><h3>E-way</h3><div class="kpi-value sm {% if status.eway %}status-on{% else %}status-off{% endif %}">{{ 'Ready' if status.eway else 'Off' }}</div></div>
+  <div class="card kpi-card"><h3>Razorpay</h3><div class="kpi-value sm {% if status.razorpay %}status-on{% else %}status-off{% endif %}">{{ 'Ready' if status.razorpay else 'Off' }}</div></div>
+  <div class="card kpi-card"><h3>PhonePe</h3><div class="kpi-value sm {% if status.phonepe %}status-on{% else %}status-off{% endif %}">{{ 'Ready' if status.phonepe else 'Off' }}</div></div>
+  <div class="card kpi-card"><h3>SMS</h3><div class="kpi-value sm {% if status.sms %}status-on{% else %}status-off{% endif %}">{{ 'Ready' if status.sms else 'Off' }}</div></div>
 </div>
+
 <form method="post" class="grid grid-2">
   <div class="card">
     <h3>NIC e-Invoice (IRP)</h3>
     <div class="form-row"><label>Client ID</label><input name="irp_client_id" value="{{ settings.irp_client_id or '' }}"></div>
     <div class="form-row"><label>Client Secret</label><input name="irp_client_secret" type="password" value="{{ settings.irp_client_secret or '' }}"></div>
-    <label style="display:flex;gap:0.5rem;align-items:center"><input type="checkbox" name="irp_enabled" value="1" {% if settings.irp_enabled %}checked{% endif %}> Enable IRP</label>
+    <label class="checkbox-row"><input type="checkbox" name="irp_enabled" value="1" {% if settings.irp_enabled %}checked{% endif %}> Enable IRP</label>
   </div>
   <div class="card">
     <h3>E-way Bill Portal</h3>
     <div class="form-row"><label>Username</label><input name="eway_username" value="{{ settings.eway_username or '' }}"></div>
     <div class="form-row"><label>Password</label><input name="eway_password" type="password" value="{{ settings.eway_password or '' }}"></div>
-    <label style="display:flex;gap:0.5rem;align-items:center"><input type="checkbox" name="eway_enabled" value="1" {% if settings.eway_enabled %}checked{% endif %}> Enable E-way</label>
+    <label class="checkbox-row"><input type="checkbox" name="eway_enabled" value="1" {% if settings.eway_enabled %}checked{% endif %}> Enable E-way</label>
   </div>
   <div class="card">
     <h3>Razorpay</h3>
     <div class="form-row"><label>Key ID</label><input name="razorpay_key_id" value="{{ settings.razorpay_key_id or '' }}"></div>
     <div class="form-row"><label>Key Secret</label><input name="razorpay_key_secret" type="password" value="{{ settings.razorpay_key_secret or '' }}"></div>
-    <label style="display:flex;gap:0.5rem;align-items:center"><input type="checkbox" name="razorpay_enabled" value="1" {% if settings.razorpay_enabled %}checked{% endif %}> Enable Razorpay</label>
+    <label class="checkbox-row"><input type="checkbox" name="razorpay_enabled" value="1" {% if settings.razorpay_enabled %}checked{% endif %}> Enable Razorpay</label>
   </div>
   <div class="card">
     <h3>PhonePe</h3>
     <div class="form-row"><label>Merchant ID</label><input name="phonepe_merchant_id" value="{{ settings.phonepe_merchant_id or '' }}"></div>
     <div class="form-row"><label>Salt Key</label><input name="phonepe_salt_key" type="password" value="{{ settings.phonepe_salt_key or '' }}"></div>
-    <label style="display:flex;gap:0.5rem;align-items:center"><input type="checkbox" name="phonepe_enabled" value="1" {% if settings.phonepe_enabled %}checked{% endif %}> Enable PhonePe</label>
+    <label class="checkbox-row"><input type="checkbox" name="phonepe_enabled" value="1" {% if settings.phonepe_enabled %}checked{% endif %}> Enable PhonePe</label>
   </div>
-  <div class="card" style="grid-column:1/-1">
+  <div class="card card-span">
     <h3>SMS Alerts</h3>
     <div class="grid grid-3">
       <div class="form-row"><label>API Key</label><input name="sms_api_key" value="{{ settings.sms_api_key or '' }}"></div>
       <div class="form-row"><label>Sender ID</label><input name="sms_sender_id" value="{{ settings.sms_sender_id or '' }}" placeholder="INFIVT"></div>
       <div class="form-row"><label>Expiry alert (days)</label><input name="alert_expiry_days" type="number" value="{{ settings.alert_expiry_days or 30 }}"></div>
     </div>
-    <label style="display:flex;gap:0.5rem;align-items:center;margin-right:1rem"><input type="checkbox" name="sms_enabled" value="1" {% if settings.sms_enabled %}checked{% endif %}> Enable SMS</label>
-    <label style="display:flex;gap:0.5rem;align-items:center"><input type="checkbox" name="alert_low_stock" value="1" {% if settings.alert_low_stock %}checked{% endif %}> Low-stock SMS alerts</label>
-    <div class="grid grid-2" style="margin-top:0.75rem">
-      <label style="display:flex;gap:0.5rem;align-items:center"><input type="checkbox" name="alert_schedule_enabled" value="1" {% if settings.alert_schedule_enabled %}checked{% endif %}> Daily scheduled SMS (cron)</label>
+    <label class="checkbox-row"><input type="checkbox" name="sms_enabled" value="1" {% if settings.sms_enabled %}checked{% endif %}> Enable SMS</label>
+    <label class="checkbox-row"><input type="checkbox" name="alert_low_stock" value="1" {% if settings.alert_low_stock %}checked{% endif %}> Low-stock SMS alerts</label>
+    <div class="grid grid-2 mt-1">
+      <label class="checkbox-row"><input type="checkbox" name="alert_schedule_enabled" value="1" {% if settings.alert_schedule_enabled %}checked{% endif %}> Daily scheduled SMS (cron)</label>
       <div class="form-row"><label>Run at hour (0–23, server local)</label><input name="alert_schedule_hour" type="number" min="0" max="23" value="{{ settings.alert_schedule_hour if settings.alert_schedule_hour is not none else 9 }}"></div>
     </div>
-    <p style="color:var(--muted);font-size:0.85rem;margin-top:0.75rem">Use <code>flask run-alerts</code> or POST <code>/api/cron/alerts</code> with <code>X-Cron-Secret</code>. Credentials are stored locally — use TLS and a secret vault in production.</p>
+    <p class="hint-box">Use <code>flask run-alerts</code> or POST <code>/api/cron/alerts</code> with <code>X-Cron-Secret</code>. Credentials are stored locally — use TLS and a secret vault in production.</p>
   </div>
-  <div style="grid-column:1/-1">
+  <div class="card-span topbar-actions">
     <button class="btn btn-primary" type="submit">Save Integrations</button>
     <a class="btn btn-secondary" href="{{ url_for('settings.sms') }}">SMS Log</a>
     <a class="btn btn-secondary" href="{{ url_for('settings.audit') }}">Audit Trail</a>

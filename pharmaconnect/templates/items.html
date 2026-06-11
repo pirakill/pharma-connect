@@ -4,7 +4,7 @@
 <div class="topbar">
   <h2>Medicine Master</h2>
   {% if can_edit %}
-  <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+  <div class="topbar-actions">
     <a class="btn btn-secondary" href="{{ url_for('items.labels') }}">Print Barcodes</a>
     <a class="btn btn-secondary" href="{{ url_for('items.import_csv') }}">Import CSV</a>
     <a class="btn btn-secondary" href="{{ url_for('items.download_template') }}">Download Template</a>
@@ -13,14 +13,14 @@
   {% endif %}
 </div>
 
-<div class="grid grid-3" style="margin-bottom:1rem">
-  <div class="card"><h3>Total SKUs</h3><div class="kpi-value">{{ stats.total }}</div></div>
-  <div class="card"><h3>Active</h3><div class="kpi-value" style="color:var(--success)">{{ stats.active }}</div></div>
-  <div class="card"><h3>Inactive</h3><div class="kpi-value">{{ stats.inactive }}</div></div>
+<div class="grid grid-3 mb-1">
+  <div class="card kpi-card"><h3>Total SKUs</h3><div class="kpi-value">{{ stats.total }}</div></div>
+  <div class="card kpi-card"><h3>Active</h3><div class="kpi-value success">{{ stats.active }}</div></div>
+  <div class="card kpi-card"><h3>Inactive</h3><div class="kpi-value muted">{{ stats.inactive }}</div></div>
 </div>
 
-<form method="get" class="form-inline" style="margin-bottom:1rem">
-  <div class="form-row" style="flex:2">
+<form method="get" class="form-inline filter-bar">
+  <div class="form-row flex-2">
     <label>Search</label>
     <input name="q" value="{{ q }}" placeholder="Name, code, or barcode...">
   </div>
@@ -35,44 +35,43 @@
   <button class="btn btn-secondary" type="submit">Search</button>
 </form>
 
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>Code</th><th>Name</th><th>Barcode</th><th>Mfr</th><th>Pack</th>
-        <th>HSN</th><th>GST%</th><th>MRP</th><th>PTR</th><th>Status</th>
-        {% if can_edit %}<th></th>{% endif %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for i in rows %}
-      <tr>
-        <td><code>{{ i.code }}</code></td>
-        <td>{{ i.name }}{% if i.schedule %} <span class="badge badge-hospital">{{ i.schedule }}</span>{% endif %}</td>
-        <td>{{ i.barcode or '—' }}</td>
-        <td>{{ i.manufacturer or '—' }}</td>
-        <td>{{ i.pack }}</td>
-        <td>{{ i.hsn or '—' }}</td>
-        <td>{{ i.tax_slab.rate if i.tax_slab else '—' }}</td>
-        <td>₹{{ i.mrp }}</td>
-        <td>₹{{ i.ptr }}</td>
-        <td>{% if i.is_active %}<span class="badge badge-ok">Active</span>{% else %}<span class="badge badge-low">Off</span>{% endif %}</td>
-        {% if can_edit %}
-        <td style="white-space:nowrap">
-          <a href="{{ url_for('items.edit', iid=i.id) }}">Edit</a>
-          <form method="post" action="{{ url_for('items.toggle', iid=i.id) }}" style="display:inline">
-            <button type="submit" class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.75rem">
-              {% if i.is_active %}Deactivate{% else %}Activate{% endif %}
-            </button>
-          </form>
-        </td>
-        {% endif %}
-      </tr>
-      {% else %}
-      <tr><td colspan="11">No medicines found. {% if can_edit %}<a href="{{ url_for('items.import_csv') }}">Import CSV</a>{% endif %}</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% if rows|length >= 500 %}<p style="color:var(--muted);font-size:0.85rem;margin-top:0.5rem">Showing first 500 results — refine search.</p>{% endif %}
+<div class="card list-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th><th>Name</th><th>Barcode</th><th>Mfr</th><th>Pack</th>
+          <th>HSN</th><th>GST%</th><th>MRP</th><th>PTR</th><th>Status</th>
+          {% if can_edit %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in rows %}
+        <tr>
+          <td><code>{{ i.code }}</code></td>
+          <td>{{ i.name }}{% if i.schedule %} <span class="badge badge-hospital">{{ i.schedule }}</span>{% endif %}</td>
+          <td>{{ i.barcode or '—' }}</td>
+          <td>{{ i.manufacturer or '—' }}</td>
+          <td>{{ i.pack }}</td>
+          <td>{{ i.hsn or '—' }}</td>
+          <td>{{ i.tax_slab.rate if i.tax_slab else '—' }}</td>
+          <td>₹{{ i.mrp }}</td>
+          <td>₹{{ i.ptr }}</td>
+          <td>{% if i.is_active %}<span class="badge badge-ok">Active</span>{% else %}<span class="badge badge-low">Off</span>{% endif %}</td>
+          {% if can_edit %}
+          <td class="inline-actions">
+            <a class="btn btn-secondary btn-sm" href="{{ url_for('items.edit', iid=i.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('items.toggle', iid=i.id) }}">
+              <button class="btn btn-secondary btn-sm" type="submit">{{ 'Deactivate' if i.is_active else 'Activate' }}</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{% if can_edit %}11{% else %}10{% endif %}" class="text-muted">No medicines found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

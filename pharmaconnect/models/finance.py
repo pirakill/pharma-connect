@@ -29,6 +29,8 @@ class PartyLedger(db.Model):
     org_id = db.Column(db.Integer, db.ForeignKey("organizations.id"), nullable=False)
     party_name = db.Column(db.String(160), nullable=False)
     party_gstin = db.Column(db.String(20))
+    credit_limit = db.Column(db.Numeric(12, 2), default=0)
+    credit_days = db.Column(db.Integer, default=30)
     outstanding = db.Column(db.Numeric(12, 2), default=0)
     last_txn_on = db.Column(db.DateTime)
 

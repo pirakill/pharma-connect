@@ -5,7 +5,10 @@ from decimal import Decimal
 from sqlalchemy import desc, func
 
 from .. import db
-from ..models import Bill, BillLine, CustomerFavourite, CustomerRegularMed, RetailCustomer
+from datetime import datetime
+
+from ..models import AccountEntry, Bill, BillLine, CustomerFavourite, CustomerRegularMed, Item, RetailCustomer
+from .credit import record_retail_payment, retail_credit_status
 
 
 def customer_history(customer_id: int, limit: int = 20) -> list[dict]:
@@ -34,15 +37,19 @@ def frequent_items(customer_id: int, limit: int = 8) -> list[dict]:
     if not c:
         return []
     rows = (
-        db.session.query(BillLine.item_id, BillLine.item, func.sum(BillLine.qty).label("qty"))
+        db.session.query(BillLine.item_id, Item, func.sum(BillLine.qty).label("qty"))
         .join(Bill)
+        .join(Item, BillLine.item_id == Item.id)
         .filter(Bill.retail_customer_id == customer_id)
         .group_by(BillLine.item_id)
         .order_by(desc("qty"))
         .limit(limit)
         .all()
     )
-    return [{"item_id": r.item_id, "name": r.item.name, "mrp": float(r.item.mrp or 0), "qty": float(r.qty)} for r in rows]
+    return [
+        {"item_id": item_id, "name": item.name, "mrp": float(item.mrp or 0), "qty": float(qty)}
+        for item_id, item, qty in rows
+    ]
 
 
 def regular_meds_list(customer_id: int) -> list[CustomerRegularMed]:
@@ -59,6 +66,25 @@ def facility_favourites(facility_id: int) -> list[CustomerFavourite]:
 
 def record_credit_sale(customer: RetailCustomer, amount: Decimal) -> None:
     customer.outstanding = Decimal(str(customer.outstanding or 0)) + amount
+
+
+def record_payment(customer: RetailCustomer, amount: Decimal, note: str = "") -> AccountEntry:
+    applied = record_retail_payment(customer, amount)
+    entry = AccountEntry(
+        org_id=customer.facility_id,
+        entry_type="RECEIPT",
+        reference=f"RCPT-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+        party_name=customer.name,
+        debit=Decimal("0"),
+        credit=applied,
+        note=note or "Customer credit collection",
+    )
+    db.session.add(entry)
+    return entry
+
+
+def credit_profile(customer_id: int) -> dict:
+    return retail_credit_status(customer_id)
 
 
 def points_for_amount(amount: Decimal) -> int:

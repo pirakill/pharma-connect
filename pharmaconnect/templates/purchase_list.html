@@ -3,14 +3,15 @@
 {% block content %}
 <div class="topbar">
   <h2>Purchase Bills</h2>
-  <div>
+  <div class="topbar-actions">
     <a class="btn btn-secondary" href="{{ url_for('purchase.import_csv') }}">Import CSV</a>
     <a class="btn btn-secondary" href="{{ url_for('purchase.returns_list') }}">Returns</a>
     <a class="btn btn-secondary" href="{{ url_for('purchase.suppliers') }}">Suppliers</a>
     <a class="btn btn-primary" href="{{ url_for('purchase.new') }}">New Purchase</a>
   </div>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead>
       <tr><th>Bill #</th><th>Supplier</th><th>Warehouse</th><th>Invoice</th><th>Date</th><th>Total</th><th></th></tr>
@@ -31,5 +32,6 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

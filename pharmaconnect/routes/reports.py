@@ -198,6 +198,18 @@ def outstanding():
     return render_template("outstanding_report.html", data=data)
 
 
+@bp.route("/credit-aging")
+@login_required
+def credit_aging():
+    if current_user.is_distributor:
+        flash("Credit aging is available at facility level", "error")
+        return redirect(url_for("reports.hub"))
+    from ..services.credit import credit_aging_report
+
+    data = credit_aging_report(current_user.org_id)
+    return render_template("credit_aging_report.html", data=data)
+
+
 @bp.route("/network")
 @login_required
 def network():

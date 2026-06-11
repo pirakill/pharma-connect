@@ -1,79 +1,84 @@
 {% extends "base.html" %}
 {% block title %}Reports{% endblock %}
 {% block content %}
-<div class="topbar"><h2>Reports & Analytics</h2></div>
+<div class="topbar">
+  <div>
+    <h2>Reports</h2>
+    <p class="page-meta">Registers, GST exports, and inventory analytics</p>
+  </div>
+</div>
 
 {% if is_distributor %}
-<div class="grid grid-4" style="margin-bottom:1rem">
-  <div class="card"><h3>Facilities</h3><div class="kpi-value">{{ kpis.facility_count }}</div></div>
-  <div class="card"><h3>Consignment Value</h3><div class="kpi-value">₹{{ "{:,.0f}".format(kpis.consignment_stock_value) }}</div></div>
-  <div class="card"><h3>30-Day Network Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(kpis.sales_30d) }}</div></div>
-  <div class="card"><h3>Near Expiry Lines</h3><div class="kpi-value">{{ expiry|length }}</div></div>
-</div>
-<div class="grid grid-2">
-  <div class="card">
-    <h3>Expiry Report (90 days)</h3>
-    <table>
-      <thead><tr><th>Facility</th><th>Item</th><th>Batch</th><th>Expiry</th><th>Qty</th></tr></thead>
-      <tbody>
-        {% for r in expiry %}
-        <tr><td>{{ r.facility }}</td><td>{{ r.item }}</td><td>{{ r.batch }}</td><td>{{ r.expiry }}</td><td>{{ r.qty }}</td></tr>
-        {% else %}<tr><td colspan="5">No near-expiry stock</td></tr>{% endfor %}
-      </tbody>
-    </table>
-    <a href="{{ url_for('reports.expiry') }}">Full expiry report →</a>
-    <p style="margin-top:0.75rem"><a href="{{ url_for('purchase.batch_history') }}">Batch-wise purchase history →</a></p>
-    <p><a href="{{ url_for('reports.network') }}">Multi-branch network dashboard →</a></p>
-    <p><a href="{{ url_for('reports.purchase_register') }}">Purchase register →</a></p>
-    <p><a href="{{ url_for('reports.outstanding') }}">Outstanding (payables) →</a></p>
-    <p><a href="{{ url_for('reports.item_ledger') }}">Item stock ledger →</a></p>
-    <p><a href="{{ url_for('inventory.expired') }}">Expired stock write-off →</a></p>
-    <p><a href="{{ url_for('reports.gstr1') }}">GSTR-1 (all facilities) →</a></p>
-    <p><a href="{{ url_for('reports.gstr2') }}">GSTR-2 (purchases) →</a></p>
+<div class="grid grid-3 mb-2">
+  <div class="card stat-card">
+    <div class="stat-label">Facilities</div>
+    <div class="stat-value">{{ kpis.facility_count }}</div>
   </div>
-  <div class="card">
-    <h3>Slow Moving / Dead Stock</h3>
-    <table>
-      <thead><tr><th>Facility</th><th>Item</th><th>Qty</th><th>Value</th></tr></thead>
-      <tbody>
-        {% for r in slow %}
-        <tr><td>{{ r.facility }}</td><td>{{ r.item }}</td><td>{{ r.qty }}</td><td>₹{{ "{:,.0f}".format(r.value) }}</td></tr>
-        {% else %}<tr><td colspan="4">No dead stock detected</td></tr>{% endfor %}
-      </tbody>
-    </table>
+  <div class="card stat-card">
+    <div class="stat-label">30-Day Network Sales</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(kpis.sales_30d) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Consignment Value</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(kpis.consignment_stock_value) }}</div>
+  </div>
+</div>
+<div class="card mb-2">
+  <h3>Report Catalogue</h3>
+  <div class="link-list">
+    <a href="{{ url_for('reports.network') }}">Network Dashboard</a>
+    <a href="{{ url_for('reports.sale_register') }}">Sale Register</a>
+    <a href="{{ url_for('reports.purchase_register') }}">Purchase Register</a>
+    <a href="{{ url_for('reports.outstanding') }}">Outstanding Report</a>
+    <a href="{{ url_for('reports.credit_aging') }}">Credit Aging</a>
+    <a href="{{ url_for('reports.item_ledger') }}">Item Ledger</a>
+    <a href="{{ url_for('reports.expiry') }}">Expiry Report</a>
+    <a href="{{ url_for('inventory.expired') }}">Expired Stock</a>
+    <a href="{{ url_for('reports.gstr1') }}">GSTR-1</a>
+    <a href="{{ url_for('reports.gstr2') }}">GSTR-2</a>
+    <a href="{{ url_for('reports.gstr3b') }}">GSTR-3B</a>
   </div>
 </div>
 {% else %}
-<div class="grid grid-4" style="margin-bottom:1rem">
-  <div class="card"><h3>30-Day Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.net_sales) }}</div></div>
-  <div class="card"><h3>Returns</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.returns) }}</div></div>
-  <div class="card"><h3>Purchases</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.purchases) }}</div></div>
-  <div class="card"><h3>Gross Profit</h3><div class="kpi-value">₹{{ "{:,.0f}".format(pnl.gross_profit) }}</div><small style="color:var(--muted)">{{ "{:.1f}".format(pnl.margin_pct) }}% margin</small></div>
+<div class="grid grid-3 mb-2">
+  <div class="card stat-card">
+    <div class="stat-label">30-Day Sales</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(pnl.net_sales) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Gross Profit</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(pnl.gross_profit) }}</div>
+    <div class="stat-note">{{ "{:.1f}".format(pnl.margin_pct) }}% margin</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Purchases (30d)</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(pnl.purchases) }}</div>
+  </div>
 </div>
-<div class="grid grid-2">
-  <div class="card">
-    <h3>Daily Sales (7 days)</h3>
+<div class="card mb-2">
+  <h3>Report Catalogue</h3>
+  <div class="link-list">
+    <a href="{{ url_for('reports.sale_register') }}">Sale Register</a>
+    <a href="{{ url_for('reports.purchase_register') }}">Purchase Register</a>
+    <a href="{{ url_for('reports.outstanding') }}">Outstanding Report</a>
+    <a href="{{ url_for('reports.credit_aging') }}">Credit Aging</a>
+    <a href="{{ url_for('reports.margin') }}">Margin Report</a>
+    <a href="{{ url_for('reports.payments') }}">Payment Register</a>
+    <a href="{{ url_for('reports.item_ledger') }}">Item Ledger</a>
+    <a href="{{ url_for('inventory.expired') }}">Expired Stock</a>
+    <a href="{{ url_for('reports.expiry') }}">Expiry Report</a>
+    <a href="{{ url_for('reports.gstr1') }}">GSTR-1</a>
+    <a href="{{ url_for('reports.gstr3b') }}">GSTR-3B</a>
+    <a href="{{ url_for('items.labels') }}">Barcode Labels</a>
+  </div>
+</div>
+<div class="card">
+  <h3>Daily Sales — Last 7 Days</h3>
+  <div class="table-wrap">
     <table>
       <thead><tr><th>Date</th><th>Sales</th></tr></thead>
       <tbody>{% for d in daily %}<tr><td>{{ d.date }}</td><td>₹{{ "{:,.2f}".format(d.sales) }}</td></tr>{% endfor %}</tbody>
     </table>
-  </div>
-  <div class="card">
-    <h3>Registers & Ledgers</h3>
-    <p><a href="{{ url_for('reports.margin') }}">Gross margin report →</a></p>
-    <p><a href="{{ url_for('reports.payments') }}">UPI/Card payment register →</a></p>
-    <p><a href="{{ url_for('items.labels') }}">Barcode shelf labels →</a></p>
-    <p><a href="{{ url_for('reports.sale_register') }}">Sale register →</a></p>
-    <p><a href="{{ url_for('reports.purchase_register') }}">Purchase register →</a></p>
-    <p><a href="{{ url_for('reports.outstanding') }}">Outstanding →</a></p>
-    <p><a href="{{ url_for('reports.item_ledger') }}">Item ledger →</a></p>
-    <p><a href="{{ url_for('schemes.index') }}">Schemes & promotions →</a></p>
-    <p><a href="{{ url_for('inventory.expired') }}">Expired stock →</a></p>
-    <h3 style="margin-top:1rem">GST Reports</h3>
-    <p><a href="{{ url_for('reports.gstr1') }}">GSTR-1 →</a></p>
-    <p><a href="{{ url_for('reports.gstr3b') }}">GSTR-3B →</a></p>
-    <p><a href="{{ url_for('reports.expiry') }}">Expiry Report →</a></p>
-    <p><a href="{{ url_for('purchase.batch_history') }}">Batch Purchase History →</a></p>
   </div>
 </div>
 {% endif %}

@@ -2,7 +2,8 @@
 {% block title %}Sales Returns{% endblock %}
 {% block content %}
 <div class="topbar"><h2>Sales Returns</h2></div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead><tr><th>Return #</th><th>Bill</th><th>Date</th><th>Amount</th><th>GST Reversed</th><th></th></tr></thead>
     <tbody>
@@ -17,5 +18,6 @@
       {% else %}<tr><td colspan="6">No returns</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

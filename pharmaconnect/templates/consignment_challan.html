@@ -3,7 +3,7 @@
 {% block content %}
 <div class="topbar no-print">
   <h2>Delivery Challan — {{ shipment.number }}</h2>
-  <div>
+  <div class="topbar-actions">
     <button class="btn btn-primary" onclick="window.print()">Print Challan</button>
     <a class="btn btn-secondary" href="{{ url_for('inventory.consignments') }}">All Challans</a>
     <a class="btn btn-secondary" href="{{ url_for('inventory.live') }}">Live Stock</a>
@@ -18,14 +18,14 @@
       GSTIN: {{ shipment.distributor.gstin or '—' }}<br>
       {{ shipment.distributor.address or '' }}
     </div>
-    <div style="text-align:right">
+    <div class="text-right">
       <strong>Challan #:</strong> {{ shipment.number }}<br>
       <strong>Date:</strong> {{ shipment.shipped_on.strftime('%d-%b-%Y %H:%M') }}<br>
       <strong>Status:</strong> {{ shipment.status }}
     </div>
   </div>
 
-  <p style="margin-top:1rem">
+  <p class="mt-1">
     <strong>Ship To:</strong> {{ shipment.facility.name }} ({{ shipment.facility.kind }})<br>
     GSTIN: {{ shipment.facility.gstin or '—' }}<br>
     {{ shipment.facility.address or '' }}
@@ -44,7 +44,7 @@
       {% for l in shipment.lines %}
       <tr>
         <td>{{ loop.index }}</td>
-        <td>{{ l.item.name }} <small style="color:var(--muted)">{{ l.item.code }}</small></td>
+        <td>{{ l.item.name }} <small class="text-muted">{{ l.item.code }}</small></td>
         <td>{{ l.batch_no }}</td>
         <td>{{ l.expiry.strftime('%d-%b-%Y') }}</td>
         <td>₹{{ l.mrp }}</td>
@@ -55,24 +55,24 @@
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="6" style="text-align:right"><strong>Total units</strong></td>
+        <td colspan="6" class="text-right"><strong>Total units</strong></td>
         <td><strong>{{ shipment.lines|sum(attribute='qty') }}</strong></td>
       </tr>
     </tfoot>
   </table>
 
-  <div class="grid grid-2" style="margin-top:2rem">
+  <div class="grid grid-2 sign-grid">
     <div>
-      <p style="color:var(--muted);font-size:0.85rem">Dispatched by (Infivita)</p>
-      <div style="border-top:1px solid var(--border);margin-top:2.5rem;padding-top:0.5rem">Authorised Signatory</div>
+      <p class="text-sub">Dispatched by (Infivita)</p>
+      <div class="sign-line">Authorised Signatory</div>
     </div>
     <div>
-      <p style="color:var(--muted);font-size:0.85rem">Received by ({{ shipment.facility.name }})</p>
-      <div style="border-top:1px solid var(--border);margin-top:2.5rem;padding-top:0.5rem">Receiver Signature &amp; Date</div>
+      <p class="text-sub">Received by ({{ shipment.facility.name }})</p>
+      <div class="sign-line">Receiver Signature &amp; Date</div>
     </div>
   </div>
 
-  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+  <p class="doc-footer-note">
     This is a delivery challan for consignment stock. Not a tax invoice. Title remains with {{ shipment.distributor.name }} until sold.
   </p>
 </div>

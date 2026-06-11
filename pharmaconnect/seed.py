@@ -132,7 +132,13 @@ def seed_if_empty(force: bool = False) -> None:
             })
         inventory_service.receive_consignment(dist, fac, lines, note="Opening consignment from Infivita")
 
-    rc = RetailCustomer(facility_id=facilities[0].id, name="Ramesh Kumar", phone="9876543210", credit_limit=Decimal("5000"))
+    rc = RetailCustomer(
+        facility_id=facilities[0].id,
+        name="Ramesh Kumar",
+        phone="9876543210",
+        credit_limit=Decimal("5000"),
+        credit_days=30,
+    )
     db.session.add(rc)
     db.session.flush()
     db.session.add_all([
@@ -140,11 +146,14 @@ def seed_if_empty(force: bool = False) -> None:
             org_id=facilities[0].id,
             party_name="Telangana State Medical Corp",
             party_gstin="36INST001C1Z5",
+            credit_days=45,
+            credit_limit=Decimal("250000"),
         ),
         PartyLedger(
             org_id=facilities[0].id,
             party_name="Apollo Clinics — Hyderabad",
             party_gstin="36INST002D1Z5",
+            credit_days=30,
         ),
     ])
     db.session.add(CustomerRegularMed(customer_id=rc.id, item_id=items[3].id, typical_qty=Decimal("2")))

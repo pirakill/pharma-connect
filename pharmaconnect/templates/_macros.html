@@ -1,0 +1,39 @@
+{% macro topbar(title, live=false) %}
+<div class="topbar">
+  <h2>{% if live %}<span class="live-dot"></span>{% endif %}{{ title }}</h2>
+  {% if caller %}<div class="topbar-actions">{{ caller() }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro kpi_grid(items) %}
+<div class="grid grid-4 mb-1">
+  {% for label, value, modifier in items %}
+  <div class="card kpi-card">
+    <h3>{{ label }}</h3>
+    <div class="kpi-value {{ modifier or '' }}">{{ value }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro table_card(headers, rows, empty_colspan, empty_text='No records') %}
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr>{% for h in headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% if rows %}{{ rows }}{% else %}
+        <tr><td colspan="{{ empty_colspan }}" class="text-muted">{{ empty_text }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro filter_days(name='days', value=30) %}
+<form method="get" class="filter-inline">
+  <label class="text-muted">Last <input name="{{ name }}" type="number" value="{{ value }}" min="1" max="365" class="input-narrow"> days</label>
+  <button class="btn btn-secondary" type="submit">Apply</button>
+</form>
+{% endmacro %}

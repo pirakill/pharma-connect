@@ -13,14 +13,14 @@
   </form>
 </div>
 
-<div class="grid grid-4" style="margin-bottom:1rem">
-  <div class="card"><h3>Facilities</h3><div class="kpi-value">{{ summary.facility_count }}</div></div>
-  <div class="card"><h3>Invoices</h3><div class="kpi-value">{{ summary.b2c_count + summary.b2b_count }}</div></div>
-  <div class="card"><h3>Credit Notes</h3><div class="kpi-value">{{ summary.credit_note_count }}</div></div>
-  <div class="card"><h3>Net Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_taxable) }}</div></div>
+<div class="grid grid-4 mb-1">
+  <div class="card kpi-card"><h3>Facilities</h3><div class="kpi-value">{{ summary.facility_count }}</div></div>
+  <div class="card kpi-card"><h3>Invoices</h3><div class="kpi-value">{{ summary.b2c_count + summary.b2b_count }}</div></div>
+  <div class="card kpi-card"><h3>Credit Notes</h3><div class="kpi-value">{{ summary.credit_note_count }}</div></div>
+  <div class="card kpi-card"><h3>Net Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_taxable) }}</div></div>
 </div>
 
-<div class="card" style="margin-bottom:1rem">
+<div class="card mb-1">
   <h3>Outward Invoices (all facilities)</h3>
   <table>
     <thead><tr><th>Facility</th><th>Invoice</th><th>Date</th><th>Customer</th><th>Taxable</th><th>Total</th></tr></thead>
@@ -41,8 +41,8 @@
   </table>
 </div>
 
-<div class="card">
-  <h3>Credit Notes (all facilities)</h3>
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead><tr><th>Facility</th><th>Credit Note</th><th>Date</th><th>Original Inv</th><th>Taxable</th><th>Total</th></tr></thead>
     <tbody>
@@ -62,12 +62,13 @@
     {% if summary.credit_notes %}
     <tfoot>
       <tr>
-        <td colspan="4" style="text-align:right"><strong>Net outward (INV − CRN)</strong></td>
+        <td colspan="4" class="text-right"><strong>Net outward (INV − CRN)</strong></td>
         <td><strong>₹{{ "{:,.2f}".format(summary.net_taxable) }}</strong></td>
         <td><strong>₹{{ "{:,.2f}".format(summary.net_total) }}</strong></td>
       </tr>
     </tfoot>
     {% endif %}
   </table>
+  </div>
 </div>
 {% endblock %}

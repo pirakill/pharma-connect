@@ -5,7 +5,8 @@
   <h2>Consignment Challans</h2>
   <a class="btn btn-primary" href="{{ url_for('inventory.consignment_new') }}">Ship Consignment</a>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead>
       <tr><th>Challan #</th><th>Facility</th><th>Date</th><th>Lines</th><th></th></tr>
@@ -24,5 +25,6 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

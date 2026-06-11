@@ -46,9 +46,10 @@ def test_cashier_dashboard_route(app):
         client.post("/auth/login", data={"username": "retail1", "password": "admin"})
         resp = client.get("/dashboard/")
         assert resp.status_code == 200
+        assert b"Cashier Dashboard" in resp.data
         assert b"Today" in resp.data
         assert b"New Bill" in resp.data
-        assert b"Mobile POS" in resp.data
+        assert b"POS" in resp.data
         assert b"30-Day Sales" not in resp.data
 
 

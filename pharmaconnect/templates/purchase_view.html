@@ -3,7 +3,7 @@
 {% block content %}
 <div class="topbar">
   <h2>Purchase — {{ purchase.number }}</h2>
-  <div>
+  <div class="topbar-actions">
     <a class="btn btn-secondary" href="{{ url_for('purchase.index') }}">All Purchases</a>
     <a class="btn btn-secondary" href="{{ url_for('purchase.return_new', pid=purchase.id) }}">Purchase Return</a>
   </div>
@@ -14,7 +14,7 @@
       <strong>{{ purchase.organization.name }}</strong><br>
       GSTIN: {{ purchase.organization.gstin or '—' }}
     </div>
-    <div style="text-align:right">
+    <div class="text-right">
       Date: {{ purchase.purchased_on.strftime('%d-%b-%Y %H:%M') }}<br>
       Supplier: {{ purchase.supplier.name }}<br>
       Warehouse: {{ purchase.warehouse.name if purchase.warehouse else '—' }}<br>
@@ -40,13 +40,13 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      <tr><td colspan="5" style="text-align:right"><strong>Grand Total</strong></td><td colspan="2"><strong>₹{{ purchase.grand_total }}</strong></td></tr>
+      <tr><td colspan="5" class="text-right"><strong>Grand Total</strong></td><td colspan="2"><strong>₹{{ purchase.grand_total }}</strong></td></tr>
     </tfoot>
   </table>
 </div>
 
 {% if returns %}
-<div class="card" style="margin-top:1rem">
+<div class="card mt-1">
   <h3>Returns against this purchase</h3>
   <table>
     <thead><tr><th>Return #</th><th>Date</th><th>Amount</th><th></th></tr></thead>

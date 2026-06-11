@@ -13,14 +13,14 @@
   </form>
 </div>
 
-<div class="grid grid-4" style="margin-bottom:1rem">
-  <div class="card"><h3>B2C Invoices</h3><div class="kpi-value">{{ summary.b2c_count }}</div></div>
-  <div class="card"><h3>B2B Invoices</h3><div class="kpi-value">{{ summary.b2b_count }}</div></div>
-  <div class="card"><h3>Credit Notes</h3><div class="kpi-value">{{ summary.credit_note_count }}</div></div>
-  <div class="card"><h3>Net Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_taxable) }}</div></div>
+<div class="grid grid-4 mb-1">
+  <div class="card kpi-card"><h3>B2C Invoices</h3><div class="kpi-value">{{ summary.b2c_count }}</div></div>
+  <div class="card kpi-card"><h3>B2B Invoices</h3><div class="kpi-value">{{ summary.b2b_count }}</div></div>
+  <div class="card kpi-card"><h3>Credit Notes</h3><div class="kpi-value">{{ summary.credit_note_count }}</div></div>
+  <div class="card kpi-card"><h3>Net Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_taxable) }}</div></div>
 </div>
 
-<div class="card" style="margin-bottom:1rem">
+<div class="card mb-1">
   <h3>Outward Supplies (Tax Invoices)</h3>
   <table>
     <thead><tr><th>Type</th><th>Invoice</th><th>Date</th><th>Customer</th><th>GSTIN</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr></thead>
@@ -45,8 +45,8 @@
   </table>
 </div>
 
-<div class="card">
-  <h3>Credit Notes (Sales Returns) — Table 9B</h3>
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead><tr><th>Type</th><th>Credit Note</th><th>Date</th><th>Original Inv</th><th>Customer</th><th>GSTIN</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr></thead>
     <tbody>
@@ -71,7 +71,7 @@
     {% if summary.credit_notes %}
     <tfoot>
       <tr>
-        <td colspan="6" style="text-align:right"><strong>Credit note totals</strong></td>
+        <td colspan="6" class="text-right"><strong>Credit note totals</strong></td>
         <td>₹{{ "{:,.2f}".format(summary.credit_taxable) }}</td>
         <td>₹{{ "{:,.2f}".format(summary.credit_cgst) }}</td>
         <td>₹{{ "{:,.2f}".format(summary.credit_sgst) }}</td>
@@ -79,7 +79,7 @@
         <td>₹{{ "{:,.2f}".format(summary.credit_total) }}</td>
       </tr>
       <tr>
-        <td colspan="6" style="text-align:right"><strong>Net outward (INV − CRN)</strong></td>
+        <td colspan="6" class="text-right"><strong>Net outward (INV − CRN)</strong></td>
         <td><strong>₹{{ "{:,.2f}".format(summary.net_taxable) }}</strong></td>
         <td><strong>₹{{ "{:,.2f}".format(summary.net_cgst) }}</strong></td>
         <td><strong>₹{{ "{:,.2f}".format(summary.net_sgst) }}</strong></td>
@@ -89,5 +89,6 @@
     </tfoot>
     {% endif %}
   </table>
+  </div>
 </div>
 {% endblock %}

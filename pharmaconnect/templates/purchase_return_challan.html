@@ -3,7 +3,7 @@
 {% block content %}
 <div class="topbar no-print">
   <h2>Return Challan — {{ doc.number }}</h2>
-  <div>
+  <div class="topbar-actions">
     <button class="btn btn-primary" onclick="window.print()">Print Challan</button>
     <a class="btn btn-secondary" href="{{ url_for('purchase.credit_note', prid=doc.id) }}">Debit Note</a>
     <a class="btn btn-secondary" href="{{ url_for('purchase.view', pid=doc.purchase_id) }}">Original Purchase</a>
@@ -18,14 +18,14 @@
       GSTIN: {{ doc.organization.gstin or '—' }}<br>
       {{ doc.organization.address or '' }}
     </div>
-    <div style="text-align:right">
+    <div class="text-right">
       <strong>Challan #:</strong> {{ doc.number }}<br>
       <strong>Date:</strong> {{ doc.returned_on.strftime('%d-%b-%Y %H:%M') }}<br>
       <strong>Against Purchase:</strong> {{ doc.purchase.number }}
     </div>
   </div>
 
-  <p style="margin-top:1rem">
+  <p class="mt-1">
     <strong>Return To (Supplier):</strong> {{ doc.supplier.name }}<br>
     GSTIN: {{ doc.supplier.gstin or '—' }}<br>
     {{ doc.supplier.address or '' }}
@@ -40,7 +40,7 @@
       {% for l in doc.lines %}
       <tr>
         <td>{{ loop.index }}</td>
-        <td>{{ l.item.name }} <small style="color:var(--muted)">{{ l.item.code }}</small></td>
+        <td>{{ l.item.name }} <small class="text-muted">{{ l.item.code }}</small></td>
         <td>{{ l.batch_no }}</td>
         <td>{{ l.purchase_line.expiry.strftime('%d-%b-%Y') if l.purchase_line else '—' }}</td>
         <td>{{ l.qty }}</td>
@@ -50,13 +50,13 @@
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="4" style="text-align:right"><strong>Total units returned</strong></td>
+        <td colspan="4" class="text-right"><strong>Total units returned</strong></td>
         <td colspan="2"><strong>{{ doc.lines|sum(attribute='qty') }}</strong></td>
       </tr>
     </tfoot>
   </table>
 
-  <p style="color:var(--muted);font-size:0.8rem;margin-top:1.5rem">
+  <p class="doc-footer-note">
     Goods returned to supplier. Accompany with debit note {{ doc.number }} for GST adjustment.
     Not a tax invoice.
   </p>

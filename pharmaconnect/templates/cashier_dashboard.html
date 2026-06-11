@@ -1,57 +1,51 @@
 {% extends "base.html" %}
-{% block title %}{{ org.name }} — Cashier{% endblock %}
+{% block title %}Cashier — {{ org.name }}{% endblock %}
 {% block content %}
 <div class="topbar">
-  <h2>{{ org.name }}</h2>
-  <span style="color:var(--muted);font-size:0.9rem">{{ summary.date.strftime('%A, %d %b %Y') }}</span>
+  <div>
+    <h2>Cashier Dashboard</h2>
+    <p class="page-meta">{{ org.name }} · {{ summary.date.strftime('%A, %d %b %Y') }}</p>
+  </div>
 </div>
 
-<div class="cashier-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
-  <a class="btn btn-primary" href="{{ url_for('billing.new') }}" style="padding:1.25rem;font-size:1.1rem;text-align:center;text-decoration:none">
-    + New Bill
-  </a>
-  <a class="btn btn-secondary" href="{{ url_for('billing.pos') }}" style="padding:1.25rem;font-size:1.1rem;text-align:center;text-decoration:none;border-color:var(--accent);color:var(--accent)">
-    Mobile POS
-  </a>
+<div class="hero-cta-row mb-2">
+  <a class="btn btn-primary btn-lg" href="{{ url_for('billing.new') }}">New Bill</a>
+  <a class="btn btn-secondary" href="{{ url_for('billing.pos') }}">POS</a>
 </div>
 
-<div class="grid grid-4" style="margin-bottom:1.5rem">
-  <div class="card"><h3>Today's Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.sales_today) }}</div></div>
-  <div class="card"><h3>Bills Today</h3><div class="kpi-value">{{ summary.bill_count }}</div></div>
-  <div class="card"><h3>Returns Today</h3><div class="kpi-value" style="color:{% if summary.returns_today %}var(--warn){% else %}var(--muted){% endif %}">₹{{ "{:,.0f}".format(summary.returns_today) }}</div></div>
-  <div class="card"><h3>Net Today</h3><div class="kpi-value" style="color:var(--accent)">₹{{ "{:,.0f}".format(summary.net_today) }}</div></div>
+<div class="grid grid-2 mb-2">
+  <div class="card stat-card">
+    <div class="stat-label">Today's Sales</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(summary.sales_today) }}</div>
+    <div class="stat-note">{{ summary.bill_count }} invoice(s)</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Net Sales</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(summary.net_today) }}</div>
+    {% if summary.returns_today %}
+    <div class="stat-note">Returns ₹{{ "{:,.0f}".format(summary.returns_today) }}</div>
+    {% endif %}
+  </div>
 </div>
 
-<div class="grid grid-2">
-  <div class="card">
-    <h3>Today's Bills</h3>
+<div class="card">
+  <h3>Recent Invoices</h3>
+  <div class="table-wrap">
     <table>
-      <thead><tr><th>Bill</th><th>Time</th><th>Customer</th><th>Amount</th></tr></thead>
+      <thead><tr><th>Invoice</th><th>Time</th><th>Amount</th></tr></thead>
       <tbody>
         {% for b in summary.recent_bills %}
         <tr>
           <td><a href="{{ url_for('billing.view', bid=b.id) }}">{{ b.number }}</a></td>
           <td>{{ b.billed_on.strftime('%H:%M') }}</td>
-          <td>{{ b.customer_name or 'Walk-in' }}</td>
           <td>₹{{ "{:,.2f}".format(b.grand_total) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="4">No bills yet today — tap <strong>New Bill</strong> to start.</td></tr>
+        <tr><td colspan="3" class="text-muted">No invoices posted today.</td></tr>
         {% endfor %}
       </tbody>
     </table>
-    <a href="{{ url_for('billing.index') }}" style="font-size:0.85rem">View all bills →</a>
   </div>
-  <div class="card">
-    <h3>Quick Links</h3>
-    <div style="display:flex;flex-direction:column;gap:0.5rem">
-      <a class="btn btn-secondary" href="{{ url_for('customers.index') }}">Customers</a>
-      <a class="btn btn-secondary" href="{{ url_for('returns.index') }}">Returns</a>
-      <a class="btn btn-secondary" href="{{ url_for('inventory.live') }}">Live Stock</a>
-      {% if restock_alerts %}
-      <a href="{{ url_for('inventory.restock') }}" style="color:var(--danger);font-size:0.9rem">{{ restock_alerts|length }} low-stock alert(s) →</a>
-      {% endif %}
-    </div>
-  </div>
+  <a href="{{ url_for('billing.index') }}" class="link-arrow">View all bills</a>
 </div>
 {% endblock %}

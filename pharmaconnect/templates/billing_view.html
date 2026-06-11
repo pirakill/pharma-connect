@@ -3,11 +3,11 @@
 {% block content %}
 <div class="topbar no-print">
   <h2>GST Tax Invoice — {{ bill.number }}</h2>
-  <div>
+  <div class="topbar-actions">
     <button class="btn btn-secondary" onclick="window.print()">Print</button>
     <a class="btn btn-secondary no-print" href="{{ url_for('billing.einvoice_export', bid=bill.id) }}">E-invoice JSON</a>
     {% if not bill.irn %}
-    <form class="no-print" method="post" action="{{ url_for('billing.generate_irn', bid=bill.id) }}" style="display:inline">
+    <form class="no-print" method="post" action="{{ url_for('billing.generate_irn', bid=bill.id) }}" class="inline-form">
       <button class="btn btn-secondary" type="submit">Generate IRN</button>
     </form>
     {% endif %}
@@ -26,8 +26,8 @@
       GSTIN: {{ bill.facility.gstin or '—' }}<br>
       DL: {{ bill.facility.drug_license or '—' }}
     </div>
-    <div style="text-align:right">
-      <div id="invoice-qr" style="display:inline-block;margin-bottom:0.5rem"></div>
+    <div class="text-right">
+      <div id="invoice-qr" class="invoice-qr"></div>
       <div>Date: {{ bill.billed_on.strftime('%d-%b-%Y %H:%M') }}<br>
       Type: {{ bill.bill_type }}<br>
       Payment: {{ bill.payment_mode }}{% if bill.payment_ref %} ({{ bill.payment_ref }}){% endif %}
@@ -40,6 +40,7 @@
     {% if bill.doctor_name %}<br><strong>Doctor:</strong> {{ bill.doctor_name }}{% endif %}
   </p>
 
+  <div class="table-wrap">
   <table>
     <thead>
       <tr><th>Item</th><th>HSN</th><th>GST%</th><th>Batch</th><th>Qty</th><th>Rate</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr>
@@ -62,24 +63,25 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      <tr><td colspan="6" style="text-align:right"><strong>Subtotal</strong></td><td colspan="5">₹{{ bill.subtotal }}</td></tr>
-      <tr><td colspan="6" style="text-align:right">Discount</td><td colspan="5">₹{{ bill.discount }}</td></tr>
-      <tr><td colspan="6" style="text-align:right">Taxable</td><td colspan="5">₹{{ bill.taxable }}</td></tr>
-      <tr><td colspan="6" style="text-align:right">CGST / SGST / IGST</td><td colspan="5">₹{{ bill.cgst }} / ₹{{ bill.sgst }} / ₹{{ bill.igst }}</td></tr>
-      <tr><td colspan="6" style="text-align:right"><strong>Grand Total</strong></td><td colspan="5"><strong>₹{{ bill.grand_total }}</strong></td></tr>
+      <tr><td colspan="6" class="text-right"><strong>Subtotal</strong></td><td colspan="5">₹{{ bill.subtotal }}</td></tr>
+      <tr><td colspan="6" class="text-right">Discount</td><td colspan="5">₹{{ bill.discount }}</td></tr>
+      <tr><td colspan="6" class="text-right">Taxable</td><td colspan="5">₹{{ bill.taxable }}</td></tr>
+      <tr><td colspan="6" class="text-right">CGST / SGST / IGST</td><td colspan="5">₹{{ bill.cgst }} / ₹{{ bill.sgst }} / ₹{{ bill.igst }}</td></tr>
+      <tr><td colspan="6" class="text-right"><strong>Grand Total</strong></td><td colspan="5"><strong>₹{{ bill.grand_total }}</strong></td></tr>
     </tfoot>
   </table>
+  </div>
   {% if eway_required %}
-  <div class="no-print" style="margin-top:1rem;padding:0.75rem;border:1px solid var(--border);border-radius:8px">
+  <div class="no-print eway-box mt-1">
     <strong>E-way bill required</strong> (invoice ≥ ₹50,000)
-    <form method="post" action="{{ url_for('billing.set_eway', bid=bill.id) }}" style="display:flex;gap:0.5rem;margin-top:0.5rem;align-items:center">
+    <form method="post" action="{{ url_for('billing.set_eway', bid=bill.id) }}" class="eway-form">
       <input name="eway_no" value="{{ bill.eway_no or '' }}" placeholder="12-digit e-way number">
       <button class="btn btn-secondary" type="submit">Save E-way No</button>
     </form>
-    {% if bill.eway_no %}<p style="color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0">E-way: {{ bill.eway_no }}</p>{% endif %}
+    {% if bill.eway_no %}<p class="text-sub mt-1">E-way: {{ bill.eway_no }}</p>{% endif %}
   </div>
   {% endif %}
-  <p style="color:var(--muted);font-size:0.8rem;margin-top:1rem">
+  <p class="doc-footer-note">
     Scan QR for invoice verification. Consignment settlement: facilities are auto-charged at PTR when this bill is posted.
   </p>
 </div>

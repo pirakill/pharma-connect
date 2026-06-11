@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Credit Aging{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h2>Credit Aging</h2>
+    <p class="page-meta">Open credit invoices by days past due</p>
+  </div>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{{ url_for('reports.outstanding') }}">Outstanding Report</a>
+  </div>
+</div>
+
+<div class="grid grid-3 mb-2">
+  <div class="card stat-card">
+    <div class="stat-label">Not Yet Due</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(data.buckets.current) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">1–30 Days Overdue</div>
+    <div class="stat-value warn">₹{{ "{:,.0f}".format(data.buckets.days_1_30) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">31–60 Days Overdue</div>
+    <div class="stat-value warn">₹{{ "{:,.0f}".format(data.buckets.days_31_60) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">61–90 Days Overdue</div>
+    <div class="stat-value danger">₹{{ "{:,.0f}".format(data.buckets.days_61_90) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">90+ Days Overdue</div>
+    <div class="stat-value danger">₹{{ "{:,.0f}".format(data.buckets.days_90_plus) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Total Open Credit</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(data.total_open) }}</div>
+  </div>
+</div>
+
+<div class="card list-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Invoice</th><th>Party</th><th>Type</th><th>Billed</th><th>Due</th>
+          <th>Balance</th><th>Days Past Due</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in data.rows %}
+        <tr class="{% if r.overdue %}cell-danger{% endif %}">
+          <td>{{ r.invoice }}</td>
+          <td>{{ r.party }}</td>
+          <td>{{ r.party_type }}</td>
+          <td>{{ r.billed_on }}</td>
+          <td>{{ r.due_date }}</td>
+          <td>₹{{ "{:,.2f}".format(r.balance) }}</td>
+          <td>{% if r.days_past_due > 0 %}{{ r.days_past_due }}{% else %}—{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-muted">No open credit invoices</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

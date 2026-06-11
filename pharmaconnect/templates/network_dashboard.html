@@ -3,40 +3,44 @@
 {% block content %}
 <div class="topbar">
   <h2>Multi-Branch Network Dashboard</h2>
-  <form method="get" style="display:flex;gap:0.5rem;align-items:center">
-    <label>Last <input name="days" type="number" value="{{ days }}" min="1" max="365" style="width:4rem"> days</label>
+  <form method="get" class="filter-inline">
+    <label class="text-muted">Last <input name="days" type="number" value="{{ days }}" min="1" max="365" class="input-narrow"> days</label>
     <button class="btn btn-secondary" type="submit">Apply</button>
   </form>
 </div>
-<div class="grid grid-4" style="margin-bottom:1rem">
-  <div class="card"><h3>Network Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.totals.sales) }}</div></div>
-  <div class="card"><h3>Consignment Value</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.totals.stock_value) }}</div></div>
-  <div class="card"><h3>Settlement Due</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.totals.receivable) }}</div></div>
-  <div class="card"><h3>Active SKUs</h3><div class="kpi-value">{{ data.totals.sku_count }}</div></div>
+
+<div class="grid grid-4 mb-1">
+  <div class="card kpi-card"><h3>Network Sales</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.totals.sales) }}</div></div>
+  <div class="card kpi-card"><h3>Consignment Value</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.totals.stock_value) }}</div></div>
+  <div class="card kpi-card"><h3>Settlement Due</h3><div class="kpi-value">₹{{ "{:,.0f}".format(data.totals.receivable) }}</div></div>
+  <div class="card kpi-card"><h3>Active SKUs</h3><div class="kpi-value">{{ data.totals.sku_count }}</div></div>
 </div>
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>Branch</th><th>Type</th><th>Sales</th><th>Stock</th><th>SKUs</th>
-        <th>Gross Profit</th><th>Margin</th><th>Cust. Due</th><th>Settlement</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for b in data.branches %}
-      <tr>
-        <td><strong>{{ b.name }}</strong><br><small style="color:var(--muted)">{{ b.code }}</small></td>
-        <td><span class="badge badge-{{ b.kind|lower }}">{{ b.kind }}</span></td>
-        <td>₹{{ "{:,.0f}".format(b.sales) }}</td>
-        <td>₹{{ "{:,.0f}".format(b.stock_value) }}</td>
-        <td>{{ b.sku_count }}</td>
-        <td>₹{{ "{:,.0f}".format(b.gross_profit) }}</td>
-        <td>{{ "{:.1f}".format(b.margin_pct) }}%</td>
-        <td>₹{{ "{:,.2f}".format(b.customer_due) }}</td>
-        <td>₹{{ "{:,.2f}".format(b.settlement_due) }}</td>
-      </tr>
-      {% else %}<tr><td colspan="9">No branches</td></tr>{% endfor %}
-    </tbody>
-  </table>
+
+<div class="card list-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Branch</th><th>Type</th><th>Sales</th><th>Stock</th><th>SKUs</th>
+          <th>Gross Profit</th><th>Margin</th><th>Cust. Due</th><th>Settlement</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in data.branches %}
+        <tr>
+          <td><strong>{{ b.name }}</strong><br><span class="text-sub">{{ b.code }}</span></td>
+          <td><span class="badge badge-{{ b.kind|lower }}">{{ b.kind }}</span></td>
+          <td>₹{{ "{:,.0f}".format(b.sales) }}</td>
+          <td>₹{{ "{:,.0f}".format(b.stock_value) }}</td>
+          <td>{{ b.sku_count }}</td>
+          <td>₹{{ "{:,.0f}".format(b.gross_profit) }}</td>
+          <td>{{ "{:.1f}".format(b.margin_pct) }}%</td>
+          <td>₹{{ "{:,.2f}".format(b.customer_due) }}</td>
+          <td>₹{{ "{:,.2f}".format(b.settlement_due) }}</td>
+        </tr>
+        {% else %}<tr><td colspan="9" class="text-muted">No branches</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

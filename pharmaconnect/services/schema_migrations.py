@@ -72,3 +72,41 @@ def ensure_schema() -> None:
         "integration_settings", "alert_schedule_hour",
         "ALTER TABLE integration_settings ADD COLUMN alert_schedule_hour INTEGER DEFAULT 9",
     )
+    _add_column(
+        "retail_customers", "credit_days",
+        "ALTER TABLE retail_customers ADD COLUMN credit_days INTEGER DEFAULT 30",
+    )
+    _add_column(
+        "party_ledgers", "credit_limit",
+        "ALTER TABLE party_ledgers ADD COLUMN credit_limit NUMERIC(12, 2) DEFAULT 0",
+    )
+    _add_column(
+        "party_ledgers", "credit_days",
+        "ALTER TABLE party_ledgers ADD COLUMN credit_days INTEGER DEFAULT 30",
+    )
+    _add_column(
+        "bills", "due_date",
+        "ALTER TABLE bills ADD COLUMN due_date DATETIME",
+        "ALTER TABLE bills ADD COLUMN due_date TIMESTAMP",
+    )
+    _add_column(
+        "bills", "balance_due",
+        "ALTER TABLE bills ADD COLUMN balance_due NUMERIC(12, 2) DEFAULT 0",
+    )
+
+    try:
+        db.session.execute(
+            text(
+                "UPDATE bills SET balance_due = grand_total "
+                "WHERE payment_mode = 'CREDIT' AND (balance_due IS NULL OR balance_due = 0)"
+            )
+        )
+        db.session.execute(
+            text(
+                "UPDATE bills SET due_date = datetime(billed_on, '+30 days') "
+                "WHERE payment_mode = 'CREDIT' AND due_date IS NULL"
+            )
+        )
+        db.session.commit()
+    except Exception:
+        db.session.rollback()

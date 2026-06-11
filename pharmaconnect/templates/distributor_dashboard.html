@@ -3,20 +3,22 @@
 {% block content %}
 <div class="topbar">
   <h2><span class="live-dot"></span>Distributor Command Center</h2>
-  <a class="btn btn-secondary" href="{{ url_for('reports.network') }}">Network View</a>
-  <a class="btn btn-primary" href="{{ url_for('inventory.consignment_new') }}">Ship Consignment</a>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{{ url_for('reports.network') }}">Network View</a>
+    <a class="btn btn-primary" href="{{ url_for('inventory.consignment_new') }}">Ship Consignment</a>
+  </div>
 </div>
 
-<div class="grid grid-4" style="margin-bottom:1.5rem">
-  <div class="card"><h3>Customer Facilities</h3><div class="kpi-value">{{ kpis.facility_count }}</div></div>
-  <div class="card"><h3>Consignment Stock Value</h3><div class="kpi-value">₹{{ "{:,.0f}".format(kpis.consignment_stock_value) }}</div></div>
-  <div class="card"><h3>30-Day Sales (all sites)</h3><div class="kpi-value">₹{{ "{:,.0f}".format(kpis.sales_30d) }}</div></div>
-  <div class="card"><h3>Restock Alerts</h3><div class="kpi-value" style="color:{% if restock_alerts %}var(--danger){% else %}var(--success){% endif %}">{{ restock_alerts|length }}</div></div>
+<div class="grid grid-4 mb-2">
+  <div class="card kpi-card"><h3>Customer Facilities</h3><div class="kpi-value">{{ kpis.facility_count }}</div></div>
+  <div class="card kpi-card"><h3>Consignment Stock Value</h3><div class="kpi-value">₹{{ "{:,.0f}".format(kpis.consignment_stock_value) }}</div></div>
+  <div class="card kpi-card"><h3>30-Day Sales (all sites)</h3><div class="kpi-value">₹{{ "{:,.0f}".format(kpis.sales_30d) }}</div></div>
+  <div class="card kpi-card"><h3>Restock Alerts</h3><div class="kpi-value {% if restock_alerts %}danger{% else %}success{% endif %}">{{ restock_alerts|length }}</div></div>
 </div>
 
 <div class="grid grid-2">
-  <div class="card">
-    <h3>Live Stock by Facility</h3>
+  <div class="card list-card">
+    <div class="table-wrap">
     <table>
       <thead><tr><th>Facility</th><th>Type</th><th>SKUs</th><th>Qty</th><th>Value</th></tr></thead>
       <tbody>
@@ -33,10 +35,11 @@
         {% endfor %}
       </tbody>
     </table>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Consignment Settlement Due</h3>
+  <div class="card list-card">
+    <div class="table-wrap">
     <table>
       <thead><tr><th>Facility</th><th>Outstanding</th><th>Open</th></tr></thead>
       <tbody>
@@ -51,13 +54,14 @@
         {% endfor %}
       </tbody>
     </table>
-    <a href="{{ url_for('accounting.index') }}" style="font-size:0.85rem">View settlements →</a>
+    </div>
+    <a href="{{ url_for('accounting.index') }}" class="link-arrow">View settlements →</a>
   </div>
 </div>
 
 {% if restock_alerts %}
-<div class="card" style="margin-top:1rem;border-color:var(--danger)">
-  <h3 style="color:var(--danger)">Needs Restocking</h3>
+<div class="card card-alert mt-1">
+  <h3>Needs Restocking</h3>
   <table>
     <thead><tr><th>Facility</th><th>Item</th><th>Qty</th><th>Min</th><th>Ship</th></tr></thead>
     <tbody>
@@ -65,19 +69,19 @@
       <tr>
         <td>{{ a.facility_name }}</td>
         <td>{{ a.item_name }}</td>
-        <td style="color:var(--danger);font-weight:600">{{ a.qty }}</td>
+        <td class="cell-danger">{{ a.qty }}</td>
         <td>{{ a.min_qty }}</td>
         <td><strong>{{ a.suggest_qty }}</strong></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-  <a href="{{ url_for('inventory.restock') }}" class="btn btn-primary" style="margin-top:0.75rem">View all & ship</a>
+  <a href="{{ url_for('inventory.restock') }}" class="btn btn-primary mt-1">View all &amp; ship</a>
 </div>
 {% endif %}
 
-<div class="card" style="margin-top:1rem">
-  <h3>Live Stock Snapshot <small style="color:var(--muted)">(auto-refreshes)</small></h3>
+<div class="card mt-1">
+  <h3>Live Stock Snapshot <small class="page-meta">(auto-refreshes)</small></h3>
   <table id="live-table">
     <thead><tr><th>Facility</th><th>Item</th><th>Qty</th><th>Min/Max</th><th>Status</th></tr></thead>
     <tbody>
@@ -85,7 +89,7 @@
       <tr>
         <td>{{ s.facility_name }}</td>
         <td>{{ s.item_name }}</td>
-        <td {% if s.status == 'LOW' %}style="color:var(--danger);font-weight:600"{% endif %}>{{ s.qty }}</td>
+        <td {% if s.status == 'LOW' %}class="cell-danger"{% endif %}>{{ s.qty }}</td>
         <td>{% if s.min_qty is not none %}{{ s.min_qty }}/{{ s.max_qty }}{% else %}—{% endif %}</td>
         <td>{% if s.status == 'LOW' %}<span class="badge badge-low">LOW</span>{% elif s.status %}<span class="badge badge-ok">{{ s.status }}</span>{% else %}—{% endif %}</td>
       </tr>
@@ -101,7 +105,7 @@ setInterval(async () => {
   const data = await res.json();
   const tbody = document.querySelector("#live-table tbody");
   tbody.innerHTML = data.stock.slice(0, 30).map(s => {
-    const qtyStyle = s.status === 'LOW' ? 'style="color:var(--danger);font-weight:600"' : '';
+    const qtyStyle = s.status === 'LOW' ? 'class="cell-danger"' : '';
     const lim = s.min_qty != null ? `${s.min_qty}/${s.max_qty}` : '—';
     const st = s.status === 'LOW' ? '<span class="badge badge-low">LOW</span>' : (s.status ? `<span class="badge badge-ok">${s.status}</span>` : '—');
     return `<tr><td>${s.facility_name}</td><td>${s.item_name}</td><td ${qtyStyle}>${s.qty}</td><td>${lim}</td><td>${st}</td></tr>`;

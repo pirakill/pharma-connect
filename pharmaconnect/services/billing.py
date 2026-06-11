@@ -4,6 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from .. import db
 from ..models import AccountEntry, Bill, BillLine, Item, Organization, PartyLedger, RetailCustomer
+from .credit import assert_party_credit_allowed, assert_retail_credit_allowed, mark_credit_bill
 from .customers import earn_loyalty, record_credit_sale, redeem_loyalty
 from .gst import line_tax
 from .inventory import fefo_batches, issue_stock
@@ -148,23 +149,20 @@ def create_bill(
     if payment_mode == "CREDIT" and retail_customer_id:
         rc = db.session.get(RetailCustomer, retail_customer_id)
         if rc:
-            limit = Decimal(str(rc.credit_limit or 0))
-            if limit > 0:
-                projected = Decimal(str(rc.outstanding or 0)) + bill.grand_total
-                if projected > limit:
-                    raise ValueError(
-                        f"Credit limit exceeded (limit ₹{limit}, current due ₹{rc.outstanding or 0})"
-                    )
+            assert_retail_credit_allowed(rc, bill.grand_total)
             record_credit_sale(rc, bill.grand_total)
+            mark_credit_bill(bill, int(rc.credit_days or 30))
     elif payment_mode == "CREDIT" and bill_type == "INSTITUTIONAL":
         ledger = PartyLedger.query.filter_by(org_id=facility.id, party_name=customer_name).first()
         if not ledger:
             ledger = PartyLedger(org_id=facility.id, party_name=customer_name, party_gstin=customer_gstin)
             db.session.add(ledger)
             db.session.flush()
+        assert_party_credit_allowed(ledger, bill.grand_total)
         ledger.outstanding = Decimal(str(ledger.outstanding or 0)) + bill.grand_total
         from datetime import datetime
         ledger.last_txn_on = datetime.utcnow()
+        mark_credit_bill(bill, int(ledger.credit_days or 30))
 
     if retail_customer_id:
         rc = db.session.get(RetailCustomer, retail_customer_id)

@@ -20,7 +20,7 @@
       {% endif %}
     </div>
 
-    <div class="form-row" style="margin:1rem 0">
+    <div class="form-row my-1">
       <label>Scan barcode to add line</label>
       <input id="barcode-scan" placeholder="Scan or type barcode / item code..." autocomplete="off">
     </div>
@@ -31,7 +31,7 @@
     </table>
     <button type="button" class="btn btn-secondary" onclick="addLine()">+ Line</button>
     <input type="hidden" name="lines_json" id="lines-json">
-    <button class="btn btn-primary" type="submit" style="margin-left:0.5rem">Save Purchase</button>
+    <button class="btn btn-primary" type="submit" class="ml-1">Save Purchase</button>
   </form>
 </div>
 {% endblock %}

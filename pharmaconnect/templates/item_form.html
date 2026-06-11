@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% if item %}Edit{% else %}Add{% endif %} Medicine{% endblock %}
 {% block content %}
-<div class="card" style="max-width:640px">
+<div class="card form-page">
   <h2>{% if item %}Edit {{ item.code }}{% else %}Add Medicine{% endif %}</h2>
   <form method="post">
     {% if not item %}

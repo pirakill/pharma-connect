@@ -5,7 +5,7 @@
   <h2>Batch-wise Purchase History</h2>
 </div>
 
-<form method="get" class="form-inline card" style="margin-bottom:1rem">
+<form method="get" class="form-inline card mb-1">
   <div class="form-row">
     <label>Batch number</label>
     <input name="batch_no" value="{{ batch_no }}" placeholder="WH-PCM500 or B001">
@@ -22,9 +22,8 @@
   <button class="btn btn-primary" type="submit">Search</button>
 </form>
 
-<div class="card">
-  {% if rows %}
-  <p style="color:var(--muted)">{{ rows|length }} purchase line(s) found.</p>
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead>
       <tr>
@@ -40,7 +39,7 @@
         <td>{{ r.purchase_number }}</td>
         <td>{{ r.supplier }}</td>
         <td>{{ r.warehouse }}</td>
-        <td>{{ r.item_name }} <small style="color:var(--muted)">{{ r.item_code }}</small></td>
+        <td>{{ r.item_name }} <small class="text-muted">{{ r.item_code }}</small></td>
         <td><strong>{{ r.batch_no }}</strong></td>
         <td>{{ r.expiry }}</td>
         <td>{{ r.qty_purchased }}</td>
@@ -52,8 +51,9 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}
-  <p style="color:var(--muted)">No purchase lines match your filters.</p>
+  <p class="text-muted">No purchase lines match your filters.</p>
   {% endif %}
 </div>
 {% endblock %}

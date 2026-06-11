@@ -30,6 +30,8 @@ class Bill(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     doctor_name = db.Column(db.String(120))
     payment_mode = db.Column(db.String(20), default="CASH")
+    due_date = db.Column(db.DateTime)
+    balance_due = db.Column(db.Numeric(12, 2), default=0)
     payment_ref = db.Column(db.String(60))
     order_ref = db.Column(db.String(60))
     eway_no = db.Column(db.String(20))

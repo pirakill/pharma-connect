@@ -689,10 +689,20 @@ def outstanding_report(org_id: int) -> dict:
         .all()
     )
     return {
-        "customers": [{"name": c.name, "phone": c.phone, "outstanding": float(c.outstanding or 0),
-                       "limit": float(c.credit_limit or 0)} for c in customers],
-        "parties": [{"name": p.party_name, "gstin": p.party_gstin,
-                     "outstanding": float(p.outstanding or 0)} for p in parties],
+        "customers": [{
+            "name": c.name,
+            "phone": c.phone,
+            "outstanding": float(c.outstanding or 0),
+            "limit": float(c.credit_limit or 0),
+            "credit_days": int(c.credit_days or 0),
+        } for c in customers],
+        "parties": [{
+            "name": p.party_name,
+            "gstin": p.party_gstin,
+            "outstanding": float(p.outstanding or 0),
+            "limit": float(p.credit_limit or 0),
+            "credit_days": int(p.credit_days or 0),
+        } for p in parties],
         "suppliers": [{"name": s.name, "gstin": s.gstin,
                        "outstanding": float(s.outstanding or 0)} for s in suppliers],
         "total_receivable": sum(float(c.outstanding or 0) for c in customers)

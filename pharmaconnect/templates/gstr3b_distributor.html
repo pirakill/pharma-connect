@@ -13,9 +13,9 @@
 </div>
 
 <div class="grid grid-4">
-  <div class="card"><h3>Gross Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.outward_taxable) }}</div></div>
-  <div class="card"><h3>Credit Notes ({{ summary.credit_note_count }})</h3><div class="kpi-value" style="color:var(--danger)">−₹{{ "{:,.0f}".format(summary.credit_taxable) }}</div></div>
-  <div class="card"><h3>Net Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_outward_taxable) }}</div></div>
-  <div class="card"><h3>Net Tax Liability</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_total_tax) }}</div></div>
+  <div class="card kpi-card"><h3>Gross Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.outward_taxable) }}</div></div>
+  <div class="card kpi-card"><h3>Credit Notes ({{ summary.credit_note_count }})</h3><div class="kpi-value danger">−₹{{ "{:,.0f}".format(summary.credit_taxable) }}</div></div>
+  <div class="card kpi-card"><h3>Net Outward Taxable</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_outward_taxable) }}</div></div>
+  <div class="card kpi-card"><h3>Net Tax Liability</h3><div class="kpi-value">₹{{ "{:,.0f}".format(summary.net_total_tax) }}</div></div>
 </div>
 {% endblock %}

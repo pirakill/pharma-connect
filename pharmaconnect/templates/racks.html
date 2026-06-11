@@ -3,9 +3,10 @@
 {% block content %}
 <div class="topbar">
   <h2>Rack / Shelf Locations</h2>
-  <p style="color:var(--muted);margin:0">Assign rack codes (e.g. A1, B2) to batches for faster picking.</p>
+  <p class="text-muted no-margin">Assign rack codes (e.g. A1, B2) to batches for faster picking.</p>
 </div>
-<div class="card">
+<div class="card list-card">
+  <div class="table-wrap">
   <table>
     <thead>
       <tr>
@@ -17,14 +18,14 @@
       {% for r in rows %}
       <tr>
         {% if is_distributor %}<td>{{ r.facility }}</td>{% endif %}
-        <td>{{ r.item_name }} <small style="color:var(--muted)">{{ r.item_code }}</small></td>
+        <td>{{ r.item_name }} <small class="text-muted">{{ r.item_code }}</small></td>
         <td>{{ r.batch_no }}</td>
         <td>{{ r.expiry }}</td>
         <td>{{ r.qty }}</td>
         <td>
-          <form method="post" style="display:flex;gap:0.35rem;align-items:center">
+          <form method="post" class="inline-actions">
             <input type="hidden" name="batch_id" value="{{ r.batch_id }}">
-            <input name="rack" value="{{ r.rack }}" placeholder="A1" style="width:4rem;text-transform:uppercase">
+            <input name="rack" value="{{ r.rack }}" placeholder="A1" class="input-narrow input-upper">
             <button class="btn btn-secondary" type="submit">Save</button>
           </form>
         </td>
@@ -33,5 +34,6 @@
       {% else %}<tr><td colspan="7">No stock on hand</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}

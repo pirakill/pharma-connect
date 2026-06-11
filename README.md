@@ -37,16 +37,23 @@ $env:PYTHONPATH="."
 
 ### Push to GitHub (`main`)
 
+Local repo is initialized on **`main`** with remote `https://github.com/pirakill/pharma-connect.git`.
+
+**One-time publish** (creates the GitHub repo + pushes + triggers CI):
+
 ```powershell
 cd C:\Users\Akhil\Documents\GitHub\pharma-connect
-git init -b main
-git add .
-git commit -m "Infivita PharmaConnect — v17 cashier dashboard + CI"
-git remote add origin https://github.com/<your-user>/pharma-connect.git
-git push -u origin main
+powershell -File scripts\publish_to_github.ps1
 ```
 
-Create the repo on GitHub first (empty, default branch **main**). CI runs automatically on the first push.
+If `gh` is not logged in, it opens browser auth. Alternatively:
+
+```powershell
+gh auth login -h github.com -p https -w
+gh repo create pharma-connect --public --source=. --remote=origin --push
+```
+
+CI runs at: https://github.com/pirakill/pharma-connect/actions
 
 ## Docker deploy
 

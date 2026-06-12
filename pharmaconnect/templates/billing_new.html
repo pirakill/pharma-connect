@@ -2,15 +2,27 @@
 {% block title %}New Bill{% endblock %}
 {% block content %}
 <div class="topbar">
-  <h2>New {{ bill_type }} Bill</h2>
+  <h2>New {{ bill_type }} Bill{% if is_distributor %} — {{ org.name }}{% endif %}</h2>
   <div class="topbar-actions">
-    <a class="btn btn-secondary" href="{{ url_for('billing.pos') }}">Mobile POS</a>
+    <a class="btn btn-secondary" href="{{ url_for('billing.pos', facility_id=facility_id) if is_distributor else url_for('billing.pos') }}">Mobile POS</a>
     <a class="btn btn-secondary" href="{{ url_for('billing.index') }}">All Bills</a>
   </div>
 </div>
 
 <form method="post" class="pos-layout" id="bill-form">
   <div class="card">
+    {% if is_distributor %}
+    <div class="form-row mb-1">
+      <label>Bill at Facility</label>
+      <select id="facility-select" onchange="switchFacility(this.value)">
+        {% for f in facilities %}
+        <option value="{{ f.id }}" {% if f.id == facility_id %}selected{% endif %}>{{ f.name }} ({{ f.kind }})</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="facility_id" value="{{ facility_id }}">
+      <p class="text-sub">Distributor billing uses consignment stock at the selected facility.</p>
+    </div>
+    {% endif %}
     <div class="form-inline">
       <div class="form-row">
         <label>Bill Type</label>
@@ -131,6 +143,16 @@
 <script>
 const stockMap = {{ stock_map|tojson }};
 const lines = [];
+const facilityQuery = {% if is_distributor %}"facility_id={{ facility_id }}"{% else %}""{% endif %};
+
+function apiQuery() {
+  return facilityQuery ? `?${facilityQuery}` : "";
+}
+
+function switchFacility(fid) {
+  const type = document.querySelector('select[name="bill_type"]').value;
+  window.location = `{{ url_for('billing.new') }}?facility_id=${fid}&type=${type}`;
+}
 
 function setRowVisible(id, visible) {
   document.getElementById(id).classList.toggle('hidden', !visible);
@@ -194,7 +216,7 @@ document.getElementById("item-search").addEventListener("keydown", async (e) => 
     e.preventDefault();
     const code = e.target.value.trim();
     if (!code) return;
-    const res = await fetch(`{{ url_for('api.barcode_lookup', code='BARCODE') }}`.replace('BARCODE', encodeURIComponent(code)));
+    const res = await fetch(`{{ url_for('api.barcode_lookup', code='BARCODE') }}`.replace('BARCODE', encodeURIComponent(code)) + apiQuery());
     if (res.ok) {
       const i = await res.json();
       addItem(i.id, i.name, i.mrp, i.in_stock);
@@ -205,7 +227,7 @@ document.getElementById("item-search").addEventListener("keydown", async (e) => 
 document.getElementById("item-search").addEventListener("input", async (e) => {
   const q = e.target.value.trim();
   if (q.length < 2) return;
-  const res = await fetch(`{{ url_for('api.search_items') }}?q=${encodeURIComponent(q)}`);
+  const res = await fetch(`{{ url_for('api.search_items') }}?q=${encodeURIComponent(q)}${facilityQuery ? '&' + facilityQuery : ''}`);
   const items = await res.json();
   document.getElementById("search-results").innerHTML = items.map(i =>
     `<div class="search-hit" onclick="addItem(${i.id}, '${i.name.replace(/'/g,"\\'")}', ${i.mrp}, ${i.in_stock})">

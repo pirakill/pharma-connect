@@ -76,6 +76,43 @@ def test_cashier_can_bill(app):
         assert resp.status_code == 200
 
 
+def test_distributor_can_open_new_bill(app):
+    with app.app_context():
+        client = app.test_client()
+        client.post("/auth/login", data={"username": "distributor", "password": "admin"})
+        resp = client.get("/billing/new", follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Bill at Facility" in resp.data
+        assert b"Secunderabad" in resp.data
+
+
+def test_distributor_can_post_bill(app):
+    with app.app_context():
+        from pharmaconnect.models import Bill, Item, Organization
+
+        client = app.test_client()
+        client.post("/auth/login", data={"username": "distributor", "password": "admin"})
+        fac = Organization.query.filter_by(code="RTL01").first()
+        item = Item.query.filter_by(code="PCM500").first()
+        before = Bill.query.filter_by(facility_id=fac.id).count()
+        lines = json.dumps([
+            {"item_id": item.id, "qty": 1, "rate": float(item.mrp), "discount": 0},
+        ])
+        resp = client.post(
+            "/billing/new",
+            data={
+                "facility_id": fac.id,
+                "bill_type": "RETAIL",
+                "customer_name": "Distributor Test",
+                "payment_mode": "CASH",
+                "lines_json": lines,
+            },
+            follow_redirects=False,
+        )
+        assert resp.status_code == 302
+        assert Bill.query.filter_by(facility_id=fac.id).count() == before + 1
+
+
 def test_scheduled_alerts_respects_hour(app):
     with app.app_context():
         dist = Organization.query.filter_by(kind="DISTRIBUTOR").first()

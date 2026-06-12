@@ -6,7 +6,7 @@ from flask import Blueprint, Response, flash, redirect, render_template, request
 from flask_login import current_user, login_required
 
 from .. import db
-from ..models import Bill, Item, Patient, PartyLedger, RetailCustomer
+from ..models import Bill, Item, Organization, Patient, PartyLedger, RetailCustomer
 from ..services import billing as billing_service
 from ..services import audit as audit_service
 from ..services import einvoice as einvoice_service
@@ -32,6 +32,41 @@ def _default_bill_type(org_kind: str) -> str:
     return {"RETAIL": "RETAIL", "HOSPITAL": "HOSPITAL", "INSTITUTIONAL": "INSTITUTIONAL"}.get(org_kind, "RETAIL")
 
 
+def _distributor_facilities() -> list[Organization]:
+    return (
+        Organization.query.filter_by(parent_id=current_user.org_id, is_active=True)
+        .filter(Organization.kind.in_(("RETAIL", "HOSPITAL", "INSTITUTIONAL")))
+        .order_by(Organization.name)
+        .all()
+    )
+
+
+def _resolve_billing_org(facility_id: int | None = None) -> Organization:
+    if not current_user.is_distributor:
+        return current_user.organization
+    facilities = _distributor_facilities()
+    if not facilities:
+        raise ValueError("No billing facilities linked to distributor")
+    fid = (
+        facility_id
+        or request.args.get("facility_id", type=int)
+        or request.form.get("facility_id", type=int)
+    )
+    if not fid:
+        return facilities[0]
+    fac = db.session.get(Organization, fid)
+    if not fac or fac.parent_id != current_user.org_id:
+        raise ValueError("Select a valid facility")
+    return fac
+
+
+def _can_access_bill(bill: Bill) -> bool:
+    if current_user.is_distributor:
+        fac = db.session.get(Organization, bill.facility_id)
+        return fac is not None and fac.parent_id == current_user.org_id
+    return bill.facility_id == current_user.org_id
+
+
 def _whatsapp_invoice_text(bill: Bill) -> str:
     lines = [
         f"Infivita PharmaConnect — Invoice {bill.number}",
@@ -48,20 +83,41 @@ def _whatsapp_invoice_text(bill: Bill) -> str:
 @bp.route("/")
 @login_required
 def index():
-    org = current_user.organization
     if current_user.is_distributor:
-        flash("Billing is done at facility level", "error")
-        return redirect(url_for("dashboard.home"))
-    bills = Bill.query.filter_by(facility_id=org.id).order_by(Bill.billed_on.desc()).limit(50).all()
-    return render_template("billing_list.html", bills=bills)
+        facilities = _distributor_facilities()
+        fac_ids = [f.id for f in facilities]
+        bills = (
+            Bill.query.filter(Bill.facility_id.in_(fac_ids))
+            .order_by(Bill.billed_on.desc())
+            .limit(50)
+            .all()
+            if fac_ids else []
+        )
+        return render_template(
+            "billing_list.html",
+            bills=bills,
+            is_distributor=True,
+            facilities=facilities,
+        )
+    bills = (
+        Bill.query.filter_by(facility_id=current_user.org_id)
+        .order_by(Bill.billed_on.desc())
+        .limit(50)
+        .all()
+    )
+    return render_template("billing_list.html", bills=bills, is_distributor=False)
 
 
 @bp.route("/new", methods=["GET", "POST"])
 @login_required
 def new():
-    org = current_user.organization
-    if current_user.is_distributor:
-        flash("Login as a facility user to bill", "error")
+    facilities: list[Organization] = []
+    try:
+        org = _resolve_billing_org()
+        if current_user.is_distributor:
+            facilities = _distributor_facilities()
+    except ValueError as exc:
+        flash(str(exc), "error")
         return redirect(url_for("dashboard.home"))
 
     items = Item.query.filter_by(is_active=True).order_by(Item.name).all()
@@ -121,6 +177,9 @@ def new():
         bill_type=bill_type,
         stock_map=stock_map,
         org=org,
+        is_distributor=current_user.is_distributor,
+        facilities=facilities,
+        facility_id=org.id,
     )
 
 
@@ -131,7 +190,7 @@ def view(bid: int):
     if not bill:
         flash("Bill not found", "error")
         return redirect(url_for("billing.index"))
-    if not current_user.is_distributor and bill.facility_id != current_user.org_id:
+    if not _can_access_bill(bill):
         flash("Access denied", "error")
         return redirect(url_for("billing.index"))
     wa_text = _whatsapp_invoice_text(bill)
@@ -155,7 +214,7 @@ def view(bid: int):
 @login_required
 def set_eway(bid: int):
     bill = db.session.get(Bill, bid)
-    if not bill or bill.facility_id != current_user.org_id:
+    if not bill or not _can_access_bill(bill):
         flash("Bill not found", "error")
         return redirect(url_for("billing.index"))
     bill.eway_no = request.form.get("eway_no", "").strip() or None
@@ -168,7 +227,7 @@ def set_eway(bid: int):
 @login_required
 def generate_irn(bid: int):
     bill = db.session.get(Bill, bid)
-    if not bill or bill.facility_id != current_user.org_id:
+    if not bill or not _can_access_bill(bill):
         flash("Bill not found", "error")
         return redirect(url_for("billing.index"))
     try:
@@ -189,7 +248,7 @@ def generate_irn(bid: int):
 @login_required
 def einvoice_export(bid: int):
     bill = db.session.get(Bill, bid)
-    if not bill or (not current_user.is_distributor and bill.facility_id != current_user.org_id):
+    if not bill or not _can_access_bill(bill):
         flash("Bill not found", "error")
         return redirect(url_for("billing.index"))
     content = einvoice_service.einvoice_json(bill)
@@ -205,7 +264,7 @@ def einvoice_export(bid: int):
 @login_required
 def eway_export(bid: int):
     bill = db.session.get(Bill, bid)
-    if not bill or (not current_user.is_distributor and bill.facility_id != current_user.org_id):
+    if not bill or not _can_access_bill(bill):
         flash("Bill not found", "error")
         return redirect(url_for("billing.index"))
     content = eway_service.eway_json(bill)
@@ -221,4 +280,9 @@ def eway_export(bid: int):
 @login_required
 def pos():
     """Mobile-friendly POS shortcut."""
-    return redirect(url_for("billing.new", type="RETAIL"))
+    args = {"type": "RETAIL"}
+    if current_user.is_distributor:
+        fid = request.args.get("facility_id", type=int)
+        if fid:
+            args["facility_id"] = fid
+    return redirect(url_for("billing.new", **args))

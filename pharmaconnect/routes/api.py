@@ -99,7 +99,7 @@ def warehouse_batches(wh_id: int):
 @login_required
 def customer_billing_context(cid: int):
     c = db.session.get(RetailCustomer, cid)
-    if not c:
+    if not c or not perm_service.can_access_retail_customer(current_user, c):
         return jsonify({"error": "not found"}), 404
     from ..services.credit import retail_credit_status
 

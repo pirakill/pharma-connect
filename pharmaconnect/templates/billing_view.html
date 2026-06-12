@@ -7,7 +7,7 @@
     <button class="btn btn-secondary" onclick="window.print()">Print</button>
     <a class="btn btn-secondary no-print" href="{{ url_for('billing.einvoice_export', bid=bill.id) }}">E-invoice JSON</a>
     {% if not bill.irn %}
-    <form class="no-print" method="post" action="{{ url_for('billing.generate_irn', bid=bill.id) }}" class="inline-form">
+    <form class="no-print inline-form" method="post" action="{{ url_for('billing.generate_irn', bid=bill.id) }}">
       <button class="btn btn-secondary" type="submit">Generate IRN</button>
     </form>
     {% endif %}

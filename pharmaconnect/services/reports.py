@@ -667,8 +667,12 @@ def purchase_register(org_id: int, days: int = 30) -> list[dict]:
 
 
 def outstanding_report(org_id: int) -> dict:
-    from ..models import PartyLedger, PurchaseBill, Supplier
+    from ..models import Organization, PartyLedger, Supplier
     from ..models.customer import RetailCustomer
+
+    org = db.session.get(Organization, org_id)
+    if org and org.kind == "DISTRIBUTOR":
+        return network_outstanding_report(org_id)
 
     customers = (
         RetailCustomer.query.filter_by(facility_id=org_id)
@@ -688,10 +692,45 @@ def outstanding_report(org_id: int) -> dict:
         .order_by(Supplier.outstanding.desc())
         .all()
     )
+    return _outstanding_payload(customers, parties, suppliers)
+
+
+def network_outstanding_report(distributor_id: int) -> dict:
+    from ..models import Organization, PartyLedger, Supplier
+    from ..models.customer import RetailCustomer
+
+    facilities = Organization.query.filter_by(parent_id=distributor_id, is_active=True).all()
+    fac_ids = [f.id for f in facilities]
+    customers = (
+        RetailCustomer.query.filter(RetailCustomer.facility_id.in_(fac_ids))
+        .filter(RetailCustomer.outstanding > 0)
+        .order_by(RetailCustomer.outstanding.desc())
+        .all()
+        if fac_ids else []
+    )
+    parties = (
+        PartyLedger.query.filter(PartyLedger.org_id.in_(fac_ids))
+        .filter(PartyLedger.outstanding > 0)
+        .order_by(PartyLedger.outstanding.desc())
+        .all()
+        if fac_ids else []
+    )
+    suppliers = (
+        Supplier.query.filter_by(org_id=distributor_id)
+        .filter(Supplier.outstanding > 0)
+        .order_by(Supplier.outstanding.desc())
+        .all()
+    )
+    return _outstanding_payload(customers, parties, suppliers, facilities=facilities)
+
+
+def _outstanding_payload(customers, parties, suppliers, *, facilities=None) -> dict:
+    fac_map = {f.id: f.name for f in (facilities or [])}
     return {
         "customers": [{
             "name": c.name,
             "phone": c.phone,
+            "facility": fac_map.get(c.facility_id, ""),
             "outstanding": float(c.outstanding or 0),
             "limit": float(c.credit_limit or 0),
             "credit_days": int(c.credit_days or 0),
@@ -699,6 +738,7 @@ def outstanding_report(org_id: int) -> dict:
         "parties": [{
             "name": p.party_name,
             "gstin": p.party_gstin,
+            "facility": fac_map.get(p.org_id, ""),
             "outstanding": float(p.outstanding or 0),
             "limit": float(p.credit_limit or 0),
             "credit_days": int(p.credit_days or 0),
@@ -708,6 +748,7 @@ def outstanding_report(org_id: int) -> dict:
         "total_receivable": sum(float(c.outstanding or 0) for c in customers)
         + sum(float(p.outstanding or 0) for p in parties),
         "total_payable": sum(float(s.outstanding or 0) for s in suppliers),
+        "is_network": bool(facilities),
     }
 
 

@@ -75,18 +75,34 @@ def refresh_profiles():
 def alerts():
     if current_user.is_lender:
         return redirect(url_for("scf.lender_hub"))
-    org_id = _facility_org_id()
-    if request.args.get("scan") == "1":
-        scf_service.scan_credit_alerts(org_id)
-        db.session.commit()
-        flash("Credit alerts scanned", "success")
-    rows = scf_service.list_alerts(org_id, unresolved_only=request.args.get("all") != "1")
+    if current_user.is_distributor:
+        if request.args.get("scan") == "1":
+            for fid in perm_service.distributor_facility_ids(current_user):
+                scf_service.scan_credit_alerts(fid)
+            db.session.commit()
+            flash("Credit alerts scanned across network", "success")
+        rows = scf_service.list_network_alerts(
+            current_user.org_id, unresolved_only=request.args.get("all") != "1"
+        )
+    else:
+        org_id = _facility_org_id()
+        if request.args.get("scan") == "1":
+            scf_service.scan_credit_alerts(org_id)
+            db.session.commit()
+            flash("Credit alerts scanned", "success")
+        rows = scf_service.list_alerts(org_id, unresolved_only=request.args.get("all") != "1")
     return render_template("scf_alerts.html", alerts=rows)
 
 
 @bp.route("/alerts/<int:aid>/resolve", methods=["POST"])
 @login_required
 def resolve_alert(aid: int):
+    from ..models import CreditAlert
+
+    alert = db.session.get(CreditAlert, aid)
+    if not alert or not perm_service.can_access_org(current_user, alert.org_id):
+        flash("Alert not found", "error")
+        return redirect(url_for("scf.alerts"))
     try:
         scf_service.resolve_alert(aid)
         db.session.commit()
@@ -102,6 +118,9 @@ def resolve_alert(aid: int):
 def financing_list():
     if current_user.is_lender:
         return redirect(url_for("scf.lender_hub"))
+    if current_user.is_distributor:
+        flash("Financing is submitted at facility level", "error")
+        return redirect(url_for("scf.hub"))
     rows = scf_service.facility_financing_list(_facility_org_id())
     return render_template("scf_financing_list.html", requests=rows)
 
@@ -156,7 +175,11 @@ def financing_view(rid: int):
         if req.lender_partner_id != current_user.lender_partner_id:
             flash("Not found", "error")
             return redirect(url_for("scf.lender_hub"))
-    elif not current_user.is_distributor and req.org_id != current_user.org_id:
+    elif current_user.is_distributor:
+        if req.org_id not in perm_service.distributor_facility_ids(current_user):
+            flash("Not found", "error")
+            return redirect(url_for("scf.hub"))
+    elif req.org_id != current_user.org_id:
         flash("Not found", "error")
         return redirect(url_for("scf.financing_list"))
     return render_template("scf_financing_detail.html", req=req, is_lender=current_user.is_lender)
@@ -166,6 +189,9 @@ def financing_view(rid: int):
 @login_required
 def financing_from_bill(rid: int):
     """Shortcut: submit financing for a bill (bill id in URL as rid)."""
+    if current_user.is_distributor:
+        flash("Financing is submitted at facility level", "error")
+        return redirect(url_for("scf.hub"))
     org_id = _facility_org_id()
     lender_id = int(request.form.get("lender_id") or 0)
     try:

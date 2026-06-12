@@ -101,12 +101,17 @@ def ensure_schema() -> None:
                 "WHERE payment_mode = 'CREDIT' AND (balance_due IS NULL OR balance_due = 0)"
             )
         )
-        db.session.execute(
-            text(
+        if _dialect() == "postgresql":
+            due_sql = (
+                "UPDATE bills SET due_date = billed_on + interval '30 days' "
+                "WHERE payment_mode = 'CREDIT' AND due_date IS NULL"
+            )
+        else:
+            due_sql = (
                 "UPDATE bills SET due_date = datetime(billed_on, '+30 days') "
                 "WHERE payment_mode = 'CREDIT' AND due_date IS NULL"
             )
-        )
+        db.session.execute(text(due_sql))
         db.session.commit()
     except Exception:
         db.session.rollback()

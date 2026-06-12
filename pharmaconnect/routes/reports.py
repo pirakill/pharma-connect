@@ -247,18 +247,36 @@ def margin():
 @bp.route("/item-ledger")
 @login_required
 def item_ledger():
-    from ..models import Item
+    from ..models import Item, Organization
+    from ..services import permissions as perm_service
 
     items = Item.query.filter_by(is_active=True).order_by(Item.name).all()
     item_id = request.args.get("item_id", type=int)
     days = int(request.args.get("days", 90))
+    facilities: list[Organization] = []
+    facility_id = request.args.get("facility_id", type=int)
     rows = []
+    ledger_org_id = current_user.org_id
+    if current_user.is_distributor:
+        facilities = (
+            Organization.query.filter_by(parent_id=current_user.org_id, is_active=True)
+            .order_by(Organization.name)
+            .all()
+        )
+        if facility_id and perm_service.can_access_facility(current_user, facility_id):
+            ledger_org_id = facility_id
+        elif facilities:
+            ledger_org_id = facilities[0].id
+            facility_id = ledger_org_id
     if item_id:
-        rows = report_service.item_ledger(current_user.org_id, item_id, days=days)
+        rows = report_service.item_ledger(ledger_org_id, item_id, days=days)
     return render_template(
         "item_ledger.html",
         items=items,
         item_id=item_id,
         days=days,
         rows=rows,
+        facilities=facilities,
+        facility_id=facility_id,
+        is_distributor=current_user.is_distributor,
     )

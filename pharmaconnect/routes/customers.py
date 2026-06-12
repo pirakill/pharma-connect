@@ -53,7 +53,7 @@ def new():
 @login_required
 def view(cid: int):
     c = db.session.get(RetailCustomer, cid)
-    if not c or (not current_user.is_distributor and c.facility_id != current_user.org_id):
+    if not perm_service.can_access_retail_customer(current_user, c):
         flash("Not found", "error")
         return redirect(url_for("customers.index"))
     history = customer_service.customer_history(cid)
@@ -74,7 +74,7 @@ def view(cid: int):
 @login_required
 def payment(cid: int):
     c = db.session.get(RetailCustomer, cid)
-    if not c or (not current_user.is_distributor and c.facility_id != current_user.org_id):
+    if not perm_service.can_access_retail_customer(current_user, c):
         flash("Not found", "error")
         return redirect(url_for("customers.index"))
     amount = Decimal(request.form.get("amount") or 0)

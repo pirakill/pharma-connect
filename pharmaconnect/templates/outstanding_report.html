@@ -10,16 +10,16 @@
   <div class="card list-card">
     <div class="table-wrap">
     <table>
-      <thead><tr><th>Name</th><th>Phone</th><th>Due</th><th>Days</th><th>Limit</th></tr></thead>
+      <thead><tr><th>Name</th>{% if data.is_network %}<th>Facility</th>{% endif %}<th>Phone</th><th>Due</th><th>Days</th><th>Limit</th></tr></thead>
       <tbody>
         {% for c in data.customers %}
         <tr>
-          <td>{{ c.name }}</td><td>{{ c.phone or '—' }}</td>
+          <td>{{ c.name }}</td>{% if data.is_network %}<td>{{ c.facility or '—' }}</td>{% endif %}<td>{{ c.phone or '—' }}</td>
           <td>₹{{ "{:,.2f}".format(c.outstanding) }}</td>
           <td>{{ c.credit_days }}</td>
           <td>{% if c.limit %}₹{{ "{:,.2f}".format(c.limit) }}{% else %}—{% endif %}</td>
         </tr>
-        {% else %}<tr><td colspan="5">No customer dues</td></tr>{% endfor %}
+        {% else %}<tr><td colspan="{% if data.is_network %}6{% else %}5{% endif %}">No customer dues</td></tr>{% endfor %}
       </tbody>
     </table>
     </div>
@@ -27,16 +27,16 @@
   <div class="card list-card">
     <div class="table-wrap">
     <table>
-      <thead><tr><th>Party</th><th>GSTIN</th><th>Due</th><th>Days</th><th>Limit</th></tr></thead>
+      <thead><tr><th>Party</th>{% if data.is_network %}<th>Facility</th>{% endif %}<th>GSTIN</th><th>Due</th><th>Days</th><th>Limit</th></tr></thead>
       <tbody>
         {% for p in data.parties %}
         <tr>
-          <td>{{ p.name }}</td><td>{{ p.gstin or '—' }}</td>
+          <td>{{ p.name }}</td>{% if data.is_network %}<td>{{ p.facility or '—' }}</td>{% endif %}<td>{{ p.gstin or '—' }}</td>
           <td>₹{{ "{:,.2f}".format(p.outstanding) }}</td>
           <td>{{ p.credit_days }}</td>
           <td>{% if p.limit %}₹{{ "{:,.2f}".format(p.limit) }}{% else %}—{% endif %}</td>
         </tr>
-        {% else %}<tr><td colspan="5">No party dues</td></tr>{% endfor %}
+        {% else %}<tr><td colspan="{% if data.is_network %}6{% else %}5{% endif %}">No party dues</td></tr>{% endfor %}
       </tbody>
     </table>
     </div>

@@ -61,6 +61,48 @@ def is_lender_user(user) -> bool:
     return bool(user and user.is_authenticated and role_code(user) == "LENDER")
 
 
+def distributor_facility_ids(user) -> list[int]:
+    from ..models import Organization
+
+    if not user or not user.is_authenticated or not user.is_distributor:
+        return []
+    return [
+        f.id
+        for f in Organization.query.filter_by(parent_id=user.org_id, is_active=True).all()
+    ]
+
+
+def can_access_facility(user, facility_id: int) -> bool:
+    from ..models import Organization
+
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_lender:
+        return False
+    if user.is_distributor:
+        fac = Organization.query.get(facility_id)
+        return fac is not None and fac.parent_id == user.org_id
+    return user.org_id == facility_id
+
+
+def can_access_org(user, org_id: int) -> bool:
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_lender:
+        return False
+    if user.is_distributor:
+        return org_id == user.org_id or org_id in distributor_facility_ids(user)
+    return user.org_id == org_id
+
+
+def can_access_retail_customer(user, customer) -> bool:
+    if not customer or not user or not user.is_authenticated:
+        return False
+    if user.is_distributor or user.is_lender:
+        return False
+    return customer.facility_id == user.org_id
+
+
 def check_permission(perm: str, *, api: bool = False):
     """Return a redirect/abort response when denied, else None."""
     if not current_user.is_authenticated:

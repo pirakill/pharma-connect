@@ -410,6 +410,17 @@ def list_alerts(org_id: int, *, unresolved_only: bool = True) -> list[CreditAler
     return q.order_by(CreditAlert.created_at.desc()).limit(100).all()
 
 
+def list_network_alerts(distributor_id: int, *, unresolved_only: bool = True) -> list[CreditAlert]:
+    facilities = Organization.query.filter_by(parent_id=distributor_id, is_active=True).all()
+    fac_ids = [f.id for f in facilities]
+    if not fac_ids:
+        return []
+    q = CreditAlert.query.filter(CreditAlert.org_id.in_(fac_ids))
+    if unresolved_only:
+        q = q.filter_by(is_resolved=False)
+    return q.order_by(CreditAlert.created_at.desc()).limit(100).all()
+
+
 def active_lenders() -> list[LenderPartner]:
     return LenderPartner.query.filter_by(is_active=True).order_by(LenderPartner.name).all()
 

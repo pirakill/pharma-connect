@@ -4,6 +4,13 @@
 <div class="topbar">
   <h2>Item Stock Ledger</h2>
   <form method="get" class="topbar-actions">
+    {% if is_distributor and facilities %}
+    <select name="facility_id" onchange="this.form.submit()">
+      {% for f in facilities %}
+      <option value="{{ f.id }}" {% if facility_id == f.id %}selected{% endif %}>{{ f.name }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
     <select name="item_id" required>
       <option value="">Select item</option>
       {% for i in items %}

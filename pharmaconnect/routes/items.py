@@ -10,6 +10,27 @@ from ..services import permissions as perm_service
 
 bp = Blueprint("items", __name__, url_prefix="/items")
 
+_MASTER_ROUTES = frozenset({
+    "items.new", "items.edit", "items.import_csv", "items.toggle",
+})
+_VIEW_ROUTES = frozenset({"items.index", "items.labels", "items.download_template"})
+
+
+@bp.before_request
+def _items_permission():
+    if not current_user.is_authenticated:
+        return None
+    ep = request.endpoint or ""
+    if ep in _MASTER_ROUTES:
+        if not perm_service.can_manage_items(current_user):
+            flash("Only distributor admins can manage the medicine master", "error")
+            return redirect(url_for("dashboard.home"))
+    elif ep in _VIEW_ROUTES:
+        if not perm_service.has_permission(current_user, "items_view") and not perm_service.can_manage_items(current_user):
+            flash("You do not have permission to view items", "error")
+            return redirect(url_for("dashboard.home"))
+    return None
+
 
 def _require_items_master():
     if not perm_service.can_manage_items(current_user):

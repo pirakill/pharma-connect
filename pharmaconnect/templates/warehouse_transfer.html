@@ -20,7 +20,7 @@
         <label>To warehouse</label>
         <select name="to_warehouse_id" required>
           {% for w in warehouses %}
-          <option value="{{ w.id }}" {% if loop.index == 2 %}selected{% endif %}>{{ w.code }} — {{ w.name }}</option>
+          <option value="{{ w.id }}" {% if loop.index == 2 or (loop.last and loop.index == 1) %}selected{% endif %}>{{ w.code }} — {{ w.name }}</option>
           {% endfor %}
         </select>
       </div>

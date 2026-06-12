@@ -27,11 +27,9 @@
   <h3>Report Catalogue</h3>
   <div class="link-list">
     <a href="{{ url_for('reports.network') }}">Network Dashboard</a>
-    <a href="{{ url_for('reports.sale_register') }}">Sale Register</a>
     <a href="{{ url_for('reports.purchase_register') }}">Purchase Register</a>
-    <a href="{{ url_for('reports.outstanding') }}">Outstanding Report</a>
-    <a href="{{ url_for('reports.credit_aging') }}">Credit Aging</a>
-    <a href="{{ url_for('reports.item_ledger') }}">Item Ledger</a>
+    <a href="{{ url_for('reports.outstanding') }}">Network Outstanding</a>
+    <a href="{{ url_for('reports.item_ledger') }}">Item Ledger (by facility)</a>
     <a href="{{ url_for('reports.expiry') }}">Expiry Report</a>
     <a href="{{ url_for('inventory.expired') }}">Expired Stock</a>
     <a href="{{ url_for('reports.gstr1') }}">GSTR-1</a>

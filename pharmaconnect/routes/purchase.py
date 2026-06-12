@@ -131,6 +131,9 @@ def supplier_new():
 @bp.route("/import", methods=["GET", "POST"])
 @login_required
 def import_csv():
+    if not perm_service.has_permission(current_user, "import"):
+        flash("You do not have permission to import purchases", "error")
+        return redirect(url_for("purchase.index"))
     result = None
     if request.method == "POST":
         try:

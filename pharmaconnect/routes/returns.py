@@ -20,6 +20,7 @@ def _require_returns():
 @login_required
 def index():
     if current_user.is_distributor:
+        flash("Returns are managed at facility level", "error")
         return redirect(url_for("dashboard.home"))
     rows = SaleReturn.query.filter_by(facility_id=current_user.org_id).order_by(SaleReturn.returned_on.desc()).limit(50).all()
     return render_template("returns_list.html", rows=rows)
@@ -58,7 +59,7 @@ def credit_note(rid: int):
     if not sr:
         flash("Return not found", "error")
         return redirect(url_for("returns.index"))
-    if not current_user.is_distributor and sr.facility_id != current_user.org_id:
+    if sr.facility_id != current_user.org_id:
         flash("Access denied", "error")
         return redirect(url_for("returns.index"))
     from ..services.invoice_qr import credit_note_qr_payload

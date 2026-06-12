@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 from ..models import Organization
@@ -13,6 +13,8 @@ bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 @bp.route("/")
 @login_required
 def home():
+    if current_user.is_lender:
+        return redirect(url_for("scf.lender_hub"))
     org = current_user.organization
     if current_user.is_distributor:
         kpis = report_service.distributor_kpis(org.id)

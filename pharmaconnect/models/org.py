@@ -60,7 +60,7 @@ class User(db.Model, UserMixin):
 
     @property
     def is_distributor(self) -> bool:
-        return self.organization.kind == "DISTRIBUTOR"
+        return self.organization.kind == "DISTRIBUTOR" and not self.is_lender
 
     @property
     def is_lender(self) -> bool:

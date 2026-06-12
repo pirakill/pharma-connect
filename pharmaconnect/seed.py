@@ -109,8 +109,10 @@ def seed_if_empty(force: bool = False) -> None:
         u.set_password("admin")
         db.session.add(u)
 
-    db.session.add(Patient(facility_id=facilities[1].id, name="Ravi Kumar", uhid="UHID-1001", ward="ICU-3"))
+    ravi = Patient(facility_id=facilities[1].id, name="Ravi Kumar", uhid="UHID-1001", ward="ICU-3")
+    db.session.add(ravi)
     db.session.add(Patient(facility_id=facilities[1].id, name="Priya Sharma", uhid="UHID-1002", ward="OPD"))
+    db.session.flush()
 
     # Per-facility min/max limits (retail vs hospital use different levels)
     retail_limits = {"PCM500": (50, 150), "AMX500": (30, 120), "ORS01": (40, 100),
@@ -228,7 +230,7 @@ def seed_if_empty(force: bool = False) -> None:
         facilities[1], "HOSPITAL",
         [{"item_id": items[1].id, "qty": Decimal("1"), "rate": items[1].mrp}],
         customer_name="Ravi Kumar", doctor_name="Dr. Mehta",
-        patient_id=1, payment_mode="CASH",
+        patient_id=ravi.id, payment_mode="CASH",
     )
     inst_bill = billing_service.create_bill(
         facilities[0], "INSTITUTIONAL",

@@ -1,24 +1,49 @@
 {% extends "base.html" %}
 {% block title %}{{ c.name }}{% endblock %}
 {% block content %}
-<div class="topbar"><h2>{{ c.name }}</h2></div>
+<div class="topbar">
+  <div>
+    <a class="back-link" href="{{ url_for('customers.index') }}">← Customers</a>
+    <h2>{{ c.name }}</h2>
+    <p class="page-meta">{{ c.phone or 'No phone' }}{% if c.gstin %} · GSTIN {{ c.gstin }}{% endif %}</p>
+  </div>
+</div>
+
+<div class="profile-stats mb-2">
+  <div class="profile-stat">
+    <span class="profile-stat-label">Outstanding</span>
+    <span class="profile-stat-value {% if c.outstanding %}text-danger{% endif %}">₹{{ "{:,.2f}".format(c.outstanding) }}</span>
+  </div>
+  <div class="profile-stat">
+    <span class="profile-stat-label">Credit Days</span>
+    <span class="profile-stat-value">{{ c.credit_days or 0 }}</span>
+  </div>
+  <div class="profile-stat">
+    <span class="profile-stat-label">Credit Limit</span>
+    <span class="profile-stat-value">{% if c.credit_limit %}₹{{ "{:,.2f}".format(c.credit_limit) }}{% else %}—{% endif %}</span>
+  </div>
+  <div class="profile-stat">
+    <span class="profile-stat-label">Loyalty</span>
+    <span class="profile-stat-value">{{ c.loyalty_points or 0 }} pts</span>
+  </div>
+</div>
+
 <div class="grid grid-2">
   <div class="card">
-    <p>Phone: {{ c.phone or '—' }} · Credit: <strong>{{ c.credit_days or 0 }} days</strong> · Limit: <strong>{% if c.credit_limit %}₹{{ "{:,.2f}".format(c.credit_limit) }}{% else %}—{% endif %}</strong></p>
-    <p>Outstanding: <strong>₹{{ "{:,.2f}".format(c.outstanding) }}</strong>
-      {% if credit.overdue %} · <span class="cell-danger">Overdue ₹{{ "{:,.2f}".format(credit.overdue) }}</span>{% endif %}
-      · Loyalty: <strong>{{ c.loyalty_points or 0 }} pts</strong></p>
+    {% if credit.overdue %}
+    <p class="text-danger mb-1"><strong>Overdue:</strong> ₹{{ "{:,.2f}".format(credit.overdue) }}</p>
+    {% endif %}
 
     {% if credit.open_invoices %}
-    <h3>Open Credit Invoices</h3>
-    <div class="table-wrap">
+    <h3 class="subsection-title">Open Credit Invoices</h3>
+    <div class="table-wrap mb-1">
       <table>
         <thead><tr><th>Invoice</th><th>Due</th><th>Balance</th></tr></thead>
         <tbody>
           {% for inv in credit.open_invoices %}
-          <tr class="{% if inv.overdue %}cell-danger{% endif %}">
+          <tr>
             <td>{{ inv.number }}</td>
-            <td>{{ inv.due_date }}</td>
+            <td class="{% if inv.overdue %}cell-danger{% endif %}">{{ inv.due_date }}</td>
             <td>₹{{ "{:,.2f}".format(inv.balance) }}</td>
           </tr>
           {% endfor %}
@@ -42,17 +67,28 @@
     </form>
     {% endif %}
 
-    <h3>Regular Medicines</h3>
-    <ul>{% for r in regular %}<li>{{ r.item.name }} ({{ r.typical_qty }})</li>{% else %}<li>None set</li>{% endfor %}</ul>
-    <h3>Frequently Bought</h3>
-    <ul>{% for f in frequent %}<li>{{ f.name }} — {{ f.qty }} times</li>{% else %}<li>No history</li>{% endfor %}</ul>
+    <h3 class="subsection-title">Regular Medicines</h3>
+    <ul class="simple-list">{% for r in regular %}<li>{{ r.item.name }} ({{ r.typical_qty }})</li>{% else %}<li class="text-muted">None set</li>{% endfor %}</ul>
+
+    <h3 class="subsection-title">Frequently Bought</h3>
+    <ul class="simple-list">{% for f in frequent %}<li>{{ f.name }} — {{ f.qty }} times</li>{% else %}<li class="text-muted">No history yet</li>{% endfor %}</ul>
   </div>
+
   <div class="card list-card">
+    <div class="dashboard-section" style="padding: 1rem 1.1rem 0.5rem;">
+      <h3>Purchase History</h3>
+    </div>
     <div class="table-wrap">
-    <table>
-      <thead><tr><th>Bill</th><th>Date</th><th>Total</th></tr></thead>
-      <tbody>{% for h in history %}<tr><td>{{ h.number }}</td><td>{{ h.date }}</td><td>₹{{ h.total }}</td></tr>{% endfor %}</tbody>
-    </table>
+      <table>
+        <thead><tr><th>Bill</th><th>Date</th><th>Total</th></tr></thead>
+        <tbody>
+          {% for h in history %}
+          <tr><td>{{ h.number }}</td><td>{{ h.date }}</td><td>₹{{ h.total }}</td></tr>
+          {% else %}
+          <tr class="empty-row"><td colspan="3" class="text-muted">No bills yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 {% block title %}New Customer{% endblock %}
 {% block content %}
+<div class="topbar">
+  <div>
+    <a class="back-link" href="{{ url_for('customers.index', facility_id=facility_id) if is_distributor else url_for('customers.index') }}">← Customers</a>
+    <h2>New Customer</h2>
+    <p class="page-meta">{% if is_distributor %}Saved under the selected facility{% else %}Available on billing and credit reports{% endif %}</p>
+  </div>
+</div>
+
 <div class="card form-page-narrow">
-  <h2>New Customer</h2>
   <form method="post">
     {% if is_distributor %}
     <div class="form-row">
@@ -12,15 +19,19 @@
         <option value="{{ f.id }}" {% if f.id == facility_id %}selected{% endif %}>{{ f.name }} ({{ f.kind }})</option>
         {% endfor %}
       </select>
-      <small class="text-sub">Customer is saved under the selected facility.</small>
     </div>
     {% endif %}
-    <div class="form-row"><label>Name</label><input name="name" required></div>
-    <div class="form-row"><label>Phone</label><input name="phone"></div>
-    <div class="form-row"><label>GSTIN</label><input name="gstin"></div>
-    <div class="form-row"><label>Credit Limit (₹)</label><input name="credit_limit" type="number" step="0.01" value="0"><small class="text-sub">0 = no amount cap</small></div>
-    <div class="form-row"><label>Credit Days</label><input name="credit_days" type="number" min="0" value="30"><small class="text-sub">Payment due after this many days</small></div>
-    <button class="btn btn-primary" type="submit">Save</button>
+    <div class="form-row"><label>Name</label><input name="name" required autofocus placeholder="Customer name"></div>
+    <div class="form-row"><label>Phone</label><input name="phone" placeholder="10-digit mobile"></div>
+    <div class="form-row"><label>GSTIN</label><input name="gstin" placeholder="Optional for B2B"></div>
+    <div class="form-inline">
+      <div class="form-row"><label>Credit Limit (₹)</label><input name="credit_limit" type="number" step="0.01" value="0"><small class="text-sub">0 = no cap</small></div>
+      <div class="form-row"><label>Credit Days</label><input name="credit_days" type="number" min="0" value="30"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save Customer</button>
+      <a class="btn btn-secondary" href="{{ url_for('customers.index', facility_id=facility_id) if is_distributor else url_for('customers.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

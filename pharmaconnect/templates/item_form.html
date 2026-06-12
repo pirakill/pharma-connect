@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 {% block title %}{% if item %}Edit{% else %}Add{% endif %} Medicine{% endblock %}
 {% block content %}
+<div class="topbar">
+  <div>
+    <a class="back-link" href="{{ url_for('items.index') }}">← Medicines</a>
+    <h2>{% if item %}Edit {{ item.code }}{% else %}Add Medicine{% endif %}</h2>
+    <p class="page-meta">Network-wide SKU master used across all facilities</p>
+  </div>
+</div>
+
 <div class="card form-page">
-  <h2>{% if item %}Edit {{ item.code }}{% else %}Add Medicine{% endif %}</h2>
   <form method="post">
     {% if not item %}
     <div class="form-row"><label>Code *</label><input name="code" required placeholder="PCM500"></div>
     {% endif %}
-    <div class="form-row"><label>Name *</label><input name="name" required value="{{ item.name if item else '' }}"></div>
+    <div class="form-row"><label>Name *</label><input name="name" required value="{{ item.name if item else '' }}" placeholder="Paracetamol 500mg"></div>
     <div class="form-inline">
       <div class="form-row"><label>Barcode</label><input name="barcode" value="{{ item.barcode if item else '' }}"></div>
       <div class="form-row"><label>Manufacturer</label><input name="manufacturer" value="{{ item.manufacturer if item else '' }}"></div>
@@ -38,8 +45,10 @@
       <div class="form-row"><label>MRP (₹)</label><input name="mrp" type="number" step="0.01" value="{{ item.mrp if item else '' }}"></div>
       <div class="form-row"><label>PTR (₹)</label><input name="ptr" type="number" step="0.01" value="{{ item.ptr if item else '' }}"></div>
     </div>
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a class="btn btn-secondary" href="{{ url_for('items.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save Medicine</button>
+      <a class="btn btn-secondary" href="{{ url_for('items.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

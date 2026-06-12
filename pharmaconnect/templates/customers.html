@@ -2,14 +2,17 @@
 {% block title %}Customers{% endblock %}
 {% block content %}
 <div class="topbar">
-  <h2>Customers{% if is_distributor %} — Network{% endif %}</h2>
+  <div>
+    <h2>Customers{% if is_distributor %} — Network{% endif %}</h2>
+    <p class="page-meta">{% if is_distributor %}Credit profiles per facility in your network{% else %}Walk-in and credit customers for this site{% endif %}</p>
+  </div>
   <div class="topbar-actions">
     <a class="btn btn-primary" href="{{ url_for('customers.new', facility_id=facility_id) if is_distributor else url_for('customers.new') }}">Add Customer</a>
   </div>
 </div>
 
 {% if is_distributor and facilities %}
-<form method="get" class="form-inline filter-bar">
+<form method="get" class="filter-card">
   <div class="form-row">
     <label>Facility</label>
     <select name="facility_id" onchange="this.form.submit()">
@@ -28,13 +31,16 @@
     <tbody>
       {% for c in rows %}
       <tr>
-        <td>{{ c.name }}</td><td>{{ c.phone or '—' }}</td>
+        <td><strong>{{ c.name }}</strong></td>
+        <td>{{ c.phone or '—' }}</td>
         <td>{{ c.credit_days or 0 }}</td>
-        <td>₹{{ "{:,.2f}".format(c.outstanding) }}</td>
+        <td>{% if c.outstanding %}<span class="{% if c.outstanding > 0 %}text-danger{% endif %}">₹{{ "{:,.2f}".format(c.outstanding) }}</span>{% else %}—{% endif %}</td>
         <td>{{ c.loyalty_points or 0 }} pts</td>
-        <td><a href="{{ url_for('customers.view', cid=c.id) }}">Profile</a></td>
+        <td><a class="table-action" href="{{ url_for('customers.view', cid=c.id) }}">Profile</a></td>
       </tr>
-      {% else %}<tr><td colspan="6" class="text-muted">No customers yet — <a href="{{ url_for('customers.new', facility_id=facility_id) if is_distributor else url_for('customers.new') }}">add one</a></td></tr>{% endfor %}
+      {% else %}
+      <tr class="empty-row"><td colspan="6" class="text-muted">No customers yet — <a href="{{ url_for('customers.new', facility_id=facility_id) if is_distributor else url_for('customers.new') }}">add one</a></td></tr>
+      {% endfor %}
     </tbody>
   </table>
   </div>

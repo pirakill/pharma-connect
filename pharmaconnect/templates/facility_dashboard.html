@@ -17,6 +17,10 @@
 
 <div class="grid grid-2">
   <div class="card list-card">
+    <div class="dashboard-section" style="padding: 1rem 1.1rem 0.35rem;">
+      <h3>Stock on Hand</h3>
+      <p class="section-note">Consignment inventory at this site</p>
+    </div>
     <div class="table-wrap">
     <table>
       <thead><tr><th>Item</th><th>Qty</th><th>Min/Max</th><th>Status</th></tr></thead>
@@ -37,6 +41,10 @@
     {% endif %}
   </div>
   <div class="card list-card">
+    <div class="dashboard-section" style="padding: 1rem 1.1rem 0.35rem;">
+      <h3>Receivables</h3>
+      <p class="section-note">Outstanding from customers and parties</p>
+    </div>
     <div class="table-wrap">
     <table>
       <thead><tr><th>Party</th><th>Amount</th></tr></thead>
@@ -44,7 +52,7 @@
         {% for r in receivables %}
         <tr><td>{{ r.party_name }}</td><td>₹{{ "{:,.2f}".format(r.outstanding) }}</td></tr>
         {% else %}
-        <tr><td colspan="2">None</td></tr>
+        <tr class="empty-row"><td colspan="2" class="text-muted">None</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -18,6 +18,10 @@
 
 <div class="grid grid-2">
   <div class="card list-card">
+    <div class="dashboard-section" style="padding: 1rem 1.1rem 0.35rem;">
+      <h3>Consignment by Facility</h3>
+      <p class="section-note">Live stock value across your network</p>
+    </div>
     <div class="table-wrap">
     <table>
       <thead><tr><th>Facility</th><th>Type</th><th>SKUs</th><th>Qty</th><th>Value</th></tr></thead>
@@ -31,7 +35,7 @@
           <td>₹{{ "{:,.0f}".format(f.stock_value) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="5">No consignment stock yet</td></tr>
+        <tr class="empty-row"><td colspan="5" class="text-muted">No consignment stock yet</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -39,6 +43,10 @@
   </div>
 
   <div class="card list-card">
+    <div class="dashboard-section" style="padding: 1rem 1.1rem 0.35rem;">
+      <h3>Settlement Receivables</h3>
+      <p class="section-note">PTR dues from facility sales</p>
+    </div>
     <div class="table-wrap">
     <table>
       <thead><tr><th>Facility</th><th>Outstanding</th><th>Open</th></tr></thead>
@@ -50,7 +58,7 @@
           <td>₹{{ "{:,.2f}".format(r.open_settlements) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="3">No settlement dues</td></tr>
+        <tr class="empty-row"><td colspan="3" class="text-muted">No settlement dues</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -61,7 +69,8 @@
 
 {% if restock_alerts %}
 <div class="card card-alert mt-1">
-  <h3>Needs Restocking</h3>
+  <h3 class="card-title">Needs Restocking</h3>
+  <div class="table-wrap">
   <table>
     <thead><tr><th>Facility</th><th>Item</th><th>Qty</th><th>Min</th><th>Ship</th></tr></thead>
     <tbody>
@@ -76,12 +85,17 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   <a href="{{ url_for('inventory.restock') }}" class="btn btn-primary mt-1">View all &amp; ship</a>
 </div>
 {% endif %}
 
-<div class="card mt-1">
-  <h3>Live Stock Snapshot <small class="page-meta">(auto-refreshes)</small></h3>
+<div class="card list-card mt-1">
+  <div class="dashboard-section" style="padding: 1rem 1.1rem 0.35rem;">
+    <h3>Live Stock Snapshot</h3>
+    <p class="section-note">Auto-refreshes every 15 seconds</p>
+  </div>
+  <div class="table-wrap">
   <table id="live-table">
     <thead><tr><th>Facility</th><th>Item</th><th>Qty</th><th>Min/Max</th><th>Status</th></tr></thead>
     <tbody>
@@ -96,6 +110,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </div>
 {% endblock %}
 {% block scripts %}

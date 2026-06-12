@@ -998,7 +998,158 @@ small { color: var(--muted); }
 .input-upper { text-transform: uppercase; }
 .uppercase { text-transform: uppercase; }
 
+/* ── UI polish v3 ── */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
 
+.filter-card {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-card .form-row { margin-bottom: 0; min-width: 200px; }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.back-link:hover { color: var(--accent); text-decoration: none; }
+
+.card > h2,
+.card > h3.card-title {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.dashboard-section {
+  margin-bottom: 0.65rem;
+}
+
+.dashboard-section h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dashboard-section .section-note {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.profile-stat {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.profile-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.profile-stat-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.simple-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--text);
+  line-height: 1.65;
+}
+
+.simple-list li { margin-bottom: 0.25rem; }
+.simple-list li:last-child { margin-bottom: 0; }
+
+.table-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--accent2);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.table-action:hover {
+  background: var(--accent-dim);
+  border-color: rgba(13, 148, 136, 0.35);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.badge-institutional,
+.badge-inst { background: #ccfbf1; color: #0f766e; }
+
+.list-card .link-arrow {
+  display: block;
+  padding: 0.85rem 1.1rem;
+  border-top: 1px solid var(--border);
+}
+
+.card-alert .table-wrap {
+  margin-top: 0.5rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.login-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.topbar > div:first-child { min-width: 0; }
 
 /* ── Challan / invoice print ── */
 .challan-doc { max-width: 900px; }

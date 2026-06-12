@@ -35,7 +35,9 @@ def create_app(config: dict | None = None) -> Flask:
     db.init_app(app)
     login_manager.init_app(app)
 
-    from .models import User  # noqa: WPS433
+    from .models import (  # noqa: WPS433 — register all mappers before routes
+        User, LenderPartner, CreditProfile, FinancingRequest, CreditAlert,
+    )
 
     @login_manager.user_loader
     def load_user(user_id: str):

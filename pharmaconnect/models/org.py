@@ -47,7 +47,6 @@ class User(db.Model, UserMixin):
 
     role = db.relationship("Role")
     organization = db.relationship("Organization")
-    lender_partner = db.relationship("LenderPartner")
 
     def set_password(self, pw: str) -> None:
         self.password_hash = generate_password_hash(pw)

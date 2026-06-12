@@ -1,4 +1,3 @@
-from .org import Organization, User, Role
 from .catalog import TaxSlab, Item
 from .inventory import (
     ConsignmentBatch,
@@ -17,6 +16,7 @@ from .promotions import Scheme
 from .returns import SaleReturn, SaleReturnLine
 from .settings import AuditLog, IntegrationSettings, SmsLog
 from .scf import LenderPartner, CreditProfile, FinancingRequest, CreditAlert
+from .org import Organization, User, Role
 
 __all__ = [
     "Organization", "User", "Role", "TaxSlab", "Item",

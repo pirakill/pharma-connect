@@ -1,4 +1,4 @@
-const CACHE = "pharmaconnect-v1";
+const CACHE = "pharmaconnect-v2-light";
 const ASSETS = ["/static/app.css", "/billing/pos"];
 
 self.addEventListener("install", (e) => {

@@ -1,9 +1,10 @@
 .landing-body {
   background:
-    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(45, 212, 191, 0.15), transparent),
-    radial-gradient(ellipse 50% 40% at 100% 50%, rgba(56, 189, 248, 0.08), transparent),
-    linear-gradient(165deg, #080c12 0%, #0b1017 45%, #0f1f24 100%);
+    radial-gradient(ellipse 80% 55% at 50% -15%, rgba(13, 148, 136, 0.07), transparent),
+    radial-gradient(ellipse 45% 35% at 100% 0%, rgba(2, 132, 199, 0.05), transparent),
+    #ffffff;
   min-height: 100vh;
+  color: var(--text);
 }
 
 .landing-nav {
@@ -12,20 +13,19 @@
   align-items: center;
   padding: 1rem 2rem;
   border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
-  background: rgba(11, 16, 23, 0.7);
   position: sticky;
   top: 0;
   z-index: 50;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 .landing-nav .nav-brand {
   font-weight: 800;
   font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
+  text-decoration: none;
 }
 
 .landing-nav a {
@@ -49,9 +49,6 @@
   padding: 5rem 1.5rem 2.5rem;
   max-width: 920px;
   margin: 0 auto;
-}
-
-.hero {
   animation: hero-in 0.6s ease;
 }
 
@@ -69,7 +66,7 @@
   font-size: 0.75rem;
   padding: 0.35rem 0.85rem;
   background: var(--accent-dim);
-  border: 1px solid rgba(45, 212, 191, 0.25);
+  border: 1px solid rgba(13, 148, 136, 0.2);
   border-radius: 999px;
 }
 
@@ -79,6 +76,7 @@
   margin: 1.25rem 0;
   font-weight: 800;
   letter-spacing: -0.03em;
+  color: var(--text);
 }
 
 .hero-sub {
@@ -115,16 +113,17 @@
   padding: 0 2rem;
 }
 
+.compare .list-card {
+  margin-top: 0.5rem;
+}
+
 .compare h2 {
   margin: 0 0 1.25rem;
   font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: var(--text);
 }
-
-.compare .yes { color: var(--success); font-weight: 600; }
-.compare .no { color: var(--muted); }
-.compare .them { color: var(--accent2); font-weight: 600; }
 
 .features-page {
   max-width: 1100px;
@@ -137,6 +136,12 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.features-page .module-card {
+  height: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .features-page .module-card ul {
@@ -153,4 +158,15 @@
   padding: 2.5rem;
   font-size: 0.85rem;
   border-top: 1px solid var(--border);
+  background: #f8fafc;
+}
+
+@media (max-width: 640px) {
+  .landing-nav {
+    padding: 0.85rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .hero { padding-top: 3rem; }
 }

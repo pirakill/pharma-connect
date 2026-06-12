@@ -4,8 +4,8 @@
   "description": "Distributor consignment pharma billing and live stock",
   "start_url": "/billing/pos",
   "display": "standalone",
-  "background_color": "#0f1419",
-  "theme_color": "#2dd4bf",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
   "icons": [
     {
       "src": "/static/icon-192.png",

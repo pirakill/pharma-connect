@@ -38,6 +38,10 @@ def has_permission(user, perm: str) -> bool:
 
 
 def can_manage_items(user) -> bool:
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_distributor:
+        return True
     return has_permission(user, "items_master")
 
 
@@ -98,8 +102,10 @@ def can_access_org(user, org_id: int) -> bool:
 def can_access_retail_customer(user, customer) -> bool:
     if not customer or not user or not user.is_authenticated:
         return False
-    if user.is_distributor or user.is_lender:
+    if user.is_lender:
         return False
+    if user.is_distributor:
+        return can_access_facility(user, customer.facility_id)
     return customer.facility_id == user.org_id
 
 

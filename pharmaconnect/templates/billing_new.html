@@ -34,12 +34,15 @@
       </div>
       <div class="form-row" id="retail-customer-row">
         <label>Customer</label>
-        <select name="retail_customer_id" id="customer-select" onchange="loadCustomer()">
-          <option value="">Walk-in</option>
-          {% for c in retail_customers %}
-          <option value="{{ c.id }}">{{ c.name }}{% if c.outstanding %} (₹{{ c.outstanding }} due){% endif %}</option>
-          {% endfor %}
-        </select>
+        <div class="filter-inline">
+          <select name="retail_customer_id" id="customer-select" onchange="loadCustomer()">
+            <option value="">Walk-in</option>
+            {% for c in retail_customers %}
+            <option value="{{ c.id }}">{{ c.name }}{% if c.outstanding %} (₹{{ c.outstanding }} due){% endif %}</option>
+            {% endfor %}
+          </select>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('customers.new', facility_id=facility_id) if is_distributor else url_for('customers.new') }}">+ New</a>
+        </div>
       </div>
       <div class="form-row hidden" id="institutional-party-row">
         <label>Institutional Party</label>

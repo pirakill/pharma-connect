@@ -62,6 +62,66 @@ def test_distributor_scf_alerts_lists_network(app):
         assert resp.status_code == 200
 
 
+def test_distributor_can_manage_customers(app):
+    with app.app_context():
+        retail = Organization.query.filter_by(code="RTL01").first()
+        client = app.test_client()
+        client.post("/auth/login", data={"username": "distributor", "password": "admin"})
+        resp = client.get(f"/customers/?facility_id={retail.id}")
+        assert resp.status_code == 200
+        assert b"Add Customer" in resp.data
+        resp = client.post(
+            "/customers/new",
+            data={
+                "facility_id": retail.id,
+                "name": "Network Walk-in Test",
+                "phone": "9999999999",
+                "credit_limit": "5000",
+                "credit_days": "15",
+            },
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b"Network Walk-in Test" in resp.data
+        customer = RetailCustomer.query.filter_by(name="Network Walk-in Test").first()
+        assert customer is not None
+        assert customer.facility_id == retail.id
+
+
+def test_distributor_customer_api_for_billing(app):
+    with app.app_context():
+        retail = Organization.query.filter_by(code="RTL01").first()
+        customer = RetailCustomer.query.filter_by(facility_id=retail.id).first()
+        client = app.test_client()
+        client.post("/auth/login", data={"username": "distributor", "password": "admin"})
+        resp = client.get(f"/api/customers/{customer.id}/billing-context")
+        assert resp.status_code == 200
+        assert resp.get_json()["name"] == customer.name
+
+
+def test_distributor_can_add_medicine(app):
+    with app.app_context():
+        client = app.test_client()
+        client.post("/auth/login", data={"username": "distributor", "password": "admin"})
+        resp = client.get("/items/new")
+        assert resp.status_code == 200
+        resp = client.post(
+            "/items/new",
+            data={
+                "code": "DIST01",
+                "name": "Distributor Added Med",
+                "pack": "1x10",
+                "unit": "strip",
+                "gst_rate": "12",
+                "mrp": "99",
+                "ptr": "75",
+            },
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b"DIST01" in resp.data
+
+
 def test_lender_cannot_access_items_master(app):
     with app.app_context():
         client = app.test_client()

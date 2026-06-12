@@ -4,6 +4,17 @@
 <div class="card form-page-narrow">
   <h2>New Customer</h2>
   <form method="post">
+    {% if is_distributor %}
+    <div class="form-row">
+      <label>Facility</label>
+      <select name="facility_id" required>
+        {% for f in facilities %}
+        <option value="{{ f.id }}" {% if f.id == facility_id %}selected{% endif %}>{{ f.name }} ({{ f.kind }})</option>
+        {% endfor %}
+      </select>
+      <small class="text-sub">Customer is saved under the selected facility.</small>
+    </div>
+    {% endif %}
     <div class="form-row"><label>Name</label><input name="name" required></div>
     <div class="form-row"><label>Phone</label><input name="phone"></div>
     <div class="form-row"><label>GSTIN</label><input name="gstin"></div>

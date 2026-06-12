@@ -2,11 +2,25 @@
 {% block title %}Customers{% endblock %}
 {% block content %}
 <div class="topbar">
-  <h2>Customers</h2>
+  <h2>Customers{% if is_distributor %} — Network{% endif %}</h2>
   <div class="topbar-actions">
-    <a class="btn btn-primary" href="{{ url_for('customers.new') }}">Add Customer</a>
+    <a class="btn btn-primary" href="{{ url_for('customers.new', facility_id=facility_id) if is_distributor else url_for('customers.new') }}">Add Customer</a>
   </div>
 </div>
+
+{% if is_distributor and facilities %}
+<form method="get" class="form-inline filter-bar">
+  <div class="form-row">
+    <label>Facility</label>
+    <select name="facility_id" onchange="this.form.submit()">
+      {% for f in facilities %}
+      <option value="{{ f.id }}" {% if f.id == facility_id %}selected{% endif %}>{{ f.name }} ({{ f.kind }})</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+{% endif %}
+
 <div class="card list-card">
   <div class="table-wrap">
   <table>
@@ -20,7 +34,7 @@
         <td>{{ c.loyalty_points or 0 }} pts</td>
         <td><a href="{{ url_for('customers.view', cid=c.id) }}">Profile</a></td>
       </tr>
-      {% else %}<tr><td colspan="6">No customers yet</td></tr>{% endfor %}
+      {% else %}<tr><td colspan="6" class="text-muted">No customers yet — <a href="{{ url_for('customers.new', facility_id=facility_id) if is_distributor else url_for('customers.new') }}">add one</a></td></tr>{% endfor %}
     </tbody>
   </table>
   </div>

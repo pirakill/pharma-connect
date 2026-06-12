@@ -6,7 +6,11 @@ from decimal import Decimal
 from . import db
 from datetime import date as dt
 
-from .models import CustomerFavourite, CustomerRegularMed, Item, Organization, PartyLedger, Patient, RetailCustomer, Role, Scheme, Supplier, TaxSlab, User
+from .models import (
+    CustomerFavourite, CustomerRegularMed, FinancingRequest, Item, LenderPartner,
+    Organization, PartyLedger, Patient, RetailCustomer, Role, Scheme, Supplier, TaxSlab, User,
+)
+from .services import scf as scf_service
 from .services import billing as billing_service
 from .services import inventory as inventory_service
 from .services import purchase as purchase_service
@@ -28,6 +32,7 @@ def seed_if_empty(force: bool = False) -> None:
         "DISTRIBUTOR_ADMIN": Role(code="DISTRIBUTOR_ADMIN", name="Distributor Admin"),
         "FACILITY_ADMIN": Role(code="FACILITY_ADMIN", name="Facility Admin"),
         "CASHIER": Role(code="CASHIER", name="Cashier"),
+        "LENDER": Role(code="LENDER", name="SCF Lender"),
     }
     for r in roles.values():
         db.session.add(r)
@@ -225,7 +230,7 @@ def seed_if_empty(force: bool = False) -> None:
         customer_name="Ravi Kumar", doctor_name="Dr. Mehta",
         patient_id=1, payment_mode="CASH",
     )
-    billing_service.create_bill(
+    inst_bill = billing_service.create_bill(
         facilities[0], "INSTITUTIONAL",
         [{"item_id": items[2].id, "qty": Decimal("50"), "rate": items[2].mrp}],
         customer_name="Telangana State Medical Corp",
@@ -233,5 +238,53 @@ def seed_if_empty(force: bool = False) -> None:
         payment_mode="CREDIT",
         order_ref="PO-TGMC-2026-0142",
     )
+
+    oxyzo = LenderPartner(
+        code="OXYZO",
+        name="Oxyzo (Mock)",
+        contact_email="scf@oxyzo-mock.in",
+        advance_rate_pct=Decimal("85"),
+        annual_discount_pct=Decimal("11.5"),
+        min_score=45,
+        webhook_secret="oxyzo-demo-secret",
+    )
+    vayana = LenderPartner(
+        code="VAYANA",
+        name="Vayana (Mock)",
+        contact_email="partners@vayana-mock.in",
+        advance_rate_pct=Decimal("80"),
+        annual_discount_pct=Decimal("13"),
+        min_score=55,
+        webhook_secret="vayana-demo-secret",
+    )
+    db.session.add_all([oxyzo, vayana])
+    db.session.flush()
+
+    lender_user = User(
+        username="lender1",
+        full_name="Oxyzo Credit Desk",
+        role_id=roles["LENDER"].id,
+        org_id=dist.id,
+        lender_partner_id=oxyzo.id,
+    )
+    lender_user.set_password("admin")
+    db.session.add(lender_user)
+
+    scf_service.refresh_all_profiles(facilities[0].id)
+    scf_service.refresh_all_profiles(facilities[1].id)
+    scf_service.scan_credit_alerts(facilities[0].id)
+
+    fin_req = FinancingRequest(
+        org_id=facilities[0].id,
+        bill_id=inst_bill.id,
+        lender_partner_id=oxyzo.id,
+        status="SUBMITTED",
+        invoice_amount=inst_bill.balance_due,
+        requested_amount=(inst_bill.balance_due * Decimal("0.85")).quantize(Decimal("0.01")),
+        advance_rate_pct=Decimal("85"),
+        notes="Demo institutional invoice discounting",
+        submitted_by=User.query.filter_by(username="retail_admin").first().id,
+    )
+    db.session.add(fin_req)
 
     db.session.commit()

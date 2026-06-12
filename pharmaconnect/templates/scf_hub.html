@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}SCF / Credit{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h2>Supply Chain Finance</h2>
+    <p class="page-meta">Credit scoring, invoice discounting, and collections pipeline</p>
+  </div>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{{ url_for('scf.profiles') }}">Credit Profiles</a>
+    {% if not is_distributor %}
+    <a class="btn btn-primary" href="{{ url_for('scf.financing_new') }}">Request Financing</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-4 mb-2">
+  <div class="card stat-card">
+    <div class="stat-label">Avg Credit Score</div>
+    <div class="stat-value">{{ data.avg_score or '—' }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Pending Financing</div>
+    <div class="stat-value">{{ data.pending_financing }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Disbursed (Mock)</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(data.disbursed_total) }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Overdue Exposure</div>
+    <div class="stat-value {% if data.overdue_total > 0 %}danger{% endif %}">₹{{ "{:,.0f}".format(data.overdue_total) }}</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card list-card">
+    <h3>Credit Profiles</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Party</th><th>Type</th><th>Score</th><th>Tier</th><th>Rec. Limit</th></tr></thead>
+        <tbody>
+          {% for p in data.profiles[:12] %}
+          <tr>
+            <td>{{ p.subject_name }}</td>
+            <td>{{ p.subject_type }}</td>
+            <td>{{ p.score }}</td>
+            <td><span class="badge badge-{% if p.tier == 'A' %}ok{% elif p.tier == 'B' %}full{% else %}hospital{% endif %}">{{ p.tier }}</span></td>
+            <td>₹{{ "{:,.0f}".format(p.recommended_limit) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="text-muted">Run profile refresh to generate scores</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card list-card">
+    <h3>Active Alerts <a href="{{ url_for('scf.alerts', scan=1) }}" class="link-arrow">Scan now</a></h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Party</th><th>Severity</th><th>Message</th></tr></thead>
+        <tbody>
+          {% for a in data.alerts[:10] %}
+          <tr class="{% if a.severity == 'HIGH' %}cell-danger{% endif %}">
+            <td>{{ a.alert_type }}</td>
+            <td>{{ a.subject_name }}</td>
+            <td>{{ a.severity }}</td>
+            <td>{{ a.message }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="text-muted">No active alerts</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <a href="{{ url_for('scf.alerts') }}" class="link-arrow">View all alerts</a>
+  </div>
+</div>
+
+{% if not is_distributor and financing %}
+<div class="card list-card mt-1">
+  <h3>Recent Financing Requests</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Invoice</th><th>Lender</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for r in financing[:8] %}
+        <tr>
+          <td>{{ r.bill.number }}</td>
+          <td>{{ r.lender.name }}</td>
+          <td>₹{{ "{:,.2f}".format(r.requested_amount) }}</td>
+          <td>{{ r.status }}</td>
+          <td><a href="{{ url_for('scf.financing_view', rid=r.id) }}">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card mt-1">
+  <h3>Partner Lenders (Mock)</h3>
+  <div class="grid grid-2">
+    {% for l in lenders %}
+    <div class="hint-box">
+      <strong>{{ l.name }}</strong> · Advance {{ l.advance_rate_pct }}% · Min score {{ l.min_score }}<br>
+      <span class="text-sub">{{ l.contact_email or '—' }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

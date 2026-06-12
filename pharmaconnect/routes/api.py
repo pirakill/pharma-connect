@@ -155,6 +155,21 @@ def ready():
         return jsonify({"status": "not_ready", "database": str(exc)}), 503
 
 
+@bp.route("/scf/webhook/<lender_code>", methods=["POST"])
+def scf_webhook(lender_code: str):
+    from ..services import scf as scf_service
+
+    secret = request.headers.get("X-Webhook-Secret") or request.args.get("secret", "")
+    payload = request.get_json(silent=True) or {}
+    try:
+        result = scf_service.process_lender_webhook(lender_code, payload, secret or None)
+        db.session.commit()
+        return jsonify({"ok": True, **result})
+    except ValueError as exc:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
 @bp.route("/cron/alerts", methods=["POST"])
 def cron_alerts():
     secret = request.headers.get("X-Cron-Secret") or request.args.get("secret", "")

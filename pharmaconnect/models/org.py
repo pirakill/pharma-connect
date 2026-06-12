@@ -42,10 +42,12 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(255), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     org_id = db.Column(db.Integer, db.ForeignKey("organizations.id"), nullable=False)
+    lender_partner_id = db.Column(db.Integer, db.ForeignKey("lender_partners.id"))
     is_active_flag = db.Column(db.Boolean, default=True)
 
     role = db.relationship("Role")
     organization = db.relationship("Organization")
+    lender_partner = db.relationship("LenderPartner")
 
     def set_password(self, pw: str) -> None:
         self.password_hash = generate_password_hash(pw)
@@ -60,3 +62,7 @@ class User(db.Model, UserMixin):
     @property
     def is_distributor(self) -> bool:
         return self.organization.kind == "DISTRIBUTOR"
+
+    @property
+    def is_lender(self) -> bool:
+        return bool(self.role and self.role.code == "LENDER")

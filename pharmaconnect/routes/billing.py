@@ -17,6 +17,8 @@ from ..services import customers as customer_service
 from ..services import inventory as inventory_service
 from ..services import permissions as perm_service
 from ..services import promotions as promo_service
+from ..services import scf as scf_service
+from ..services.permissions import has_permission
 
 bp = Blueprint("billing", __name__, url_prefix="/billing")
 
@@ -133,10 +135,16 @@ def view(bid: int):
         flash("Access denied", "error")
         return redirect(url_for("billing.index"))
     wa_text = _whatsapp_invoice_text(bill)
+    lenders = scf_service.active_lenders() if has_permission(current_user, "scf") else []
+    from ..models import FinancingRequest
+    existing_fin = FinancingRequest.query.filter_by(bill_id=bill.id).order_by(FinancingRequest.id.desc()).first()
     return render_template(
         "billing_view.html",
         bill=bill,
         can_return=not current_user.is_distributor,
+        can_scf=has_permission(current_user, "scf") and bill.payment_mode == "CREDIT",
+        lenders=lenders,
+        existing_fin=existing_fin,
         qr_payload=invoice_qr_payload(bill),
         whatsapp_url=f"https://wa.me/?text={quote(wa_text)}",
         eway_required=eway_service.eway_required(bill),

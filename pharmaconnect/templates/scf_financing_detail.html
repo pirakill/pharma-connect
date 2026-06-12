@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Financing {{ req.bill.number }}{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Financing Request</h2>
+  <div class="topbar-actions">
+    {% if is_lender %}
+    <a class="btn btn-secondary" href="{{ url_for('scf.lender_hub') }}">Lender Desk</a>
+    {% else %}
+    <a class="btn btn-secondary" href="{{ url_for('scf.financing_list') }}">All Requests</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Invoice</h3>
+    <p><strong>{{ req.bill.number }}</strong> · {{ req.bill.customer_name }}<br>
+    Amount: ₹{{ "{:,.2f}".format(req.invoice_amount) }} · Due {{ req.bill.due_date.strftime('%d-%b-%Y') if req.bill.due_date else '—' }}</p>
+    <h3 class="subsection-title">Financing Terms</h3>
+    <p>Lender: <strong>{{ req.lender.name }}</strong><br>
+    Status: <strong>{{ req.status }}</strong><br>
+    Requested: ₹{{ "{:,.2f}".format(req.requested_amount) }} ({{ req.advance_rate_pct }}% advance)<br>
+    {% if req.approved_amount %}Approved: ₹{{ "{:,.2f}".format(req.approved_amount) }}<br>{% endif %}
+    {% if req.discount_fee %}Discount fee: ₹{{ "{:,.2f}".format(req.discount_fee) }}<br>{% endif %}
+    {% if req.net_disbursement %}Net disbursement: <strong>₹{{ "{:,.2f}".format(req.net_disbursement) }}</strong><br>{% endif %}
+    {% if req.lender_ref %}Lender ref: <code>{{ req.lender_ref }}</code><br>{% endif %}
+    {% if req.rejection_reason %}<span class="cell-danger">{{ req.rejection_reason }}</span>{% endif %}
+    </p>
+  </div>
+
+  {% if is_lender and req.status in ('SUBMITTED', 'UNDER_REVIEW', 'APPROVED') %}
+  <div class="card">
+    <h3>Lender Actions</h3>
+    {% if req.status in ('SUBMITTED', 'UNDER_REVIEW') %}
+    <form method="post" action="{{ url_for('scf.lender_review', rid=req.id) }}" class="mb-1">
+      <input type="hidden" name="action" value="approve">
+      <button class="btn btn-primary" type="submit">Approve</button>
+    </form>
+    <form method="post" action="{{ url_for('scf.lender_review', rid=req.id) }}">
+      <input type="hidden" name="action" value="reject">
+      <div class="form-row"><input name="reason" placeholder="Rejection reason"></div>
+      <button class="btn btn-secondary" type="submit">Reject</button>
+    </form>
+    {% elif req.status == 'APPROVED' %}
+    <form method="post" action="{{ url_for('scf.lender_review', rid=req.id) }}">
+      <input type="hidden" name="action" value="disburse">
+      <button class="btn btn-primary" type="submit">Disburse Funds (Mock)</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

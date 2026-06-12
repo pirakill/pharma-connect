@@ -424,6 +424,9 @@ tbody tr:last-child td { border-bottom: none; }
   color: var(--muted);
 }
 
+.stat-value.warn { color: var(--warn); }
+.stat-value.danger { color: var(--danger); }
+
 .hero-cta-row {
   display: flex;
   gap: 0.75rem;

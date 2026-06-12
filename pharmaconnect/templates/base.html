@@ -98,6 +98,13 @@
         <a href="{{ url_for('accounting.index') }}" class="{% if ep.startswith('accounting.') %}active{% endif %}">Accounting</a>
         {% endif %}
 
+        {% if can('scf') %}
+        <a href="{{ url_for('scf.hub') }}" class="{% if ep.startswith('scf.') and not ep.startswith('scf.lender') %}active{% endif %}">SCF / Credit</a>
+        {% endif %}
+        {% if can('scf_lender') %}
+        <a href="{{ url_for('scf.lender_hub') }}" class="{% if ep.startswith('scf.lender') %}active{% endif %}">Lender Desk</a>
+        {% endif %}
+
         <div class="nav-group">
           <div class="nav-group-label">Administration</div>
           {% if can('users_manage') %}

@@ -23,8 +23,9 @@ $env:PYTHONPATH="."
 | `retail_admin` | `admin` | Facility Admin | Secunderabad retail |
 | `retail1` | `admin` | Cashier | Secunderabad retail |
 | `hospital1` | `admin` | Facility Admin | Gachibowli hospital |
+| `lender1` | `admin` | SCF Lender | Oxyzo (mock) lender desk |
 
-**Cashiers** can bill, manage customers, and view stock. **Admins** can manage purchases, accounting, integrations, and team users.
+**Cashiers** can bill, manage customers, and view stock. **Admins** can manage purchases, accounting, SCF/credit finance, integrations, and team users. **Lenders** review and disburse invoice-discounting requests.
 
 ## Tests
 

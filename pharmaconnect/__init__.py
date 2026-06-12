@@ -56,11 +56,12 @@ def create_app(config: dict | None = None) -> Flask:
     from .routes.schemes import bp as schemes_bp
     from .routes.patients import bp as patients_bp
     from .routes.settings import bp as settings_bp
+    from .routes.scf import bp as scf_bp
 
     for bp in (
         auth_bp, landing_bp, dashboard_bp, inventory_bp, billing_bp, accounting_bp,
         reports_bp, api_bp, customers_bp, returns_bp, purchase_bp, items_bp,
-        schemes_bp, patients_bp, settings_bp,
+        schemes_bp, patients_bp, settings_bp, scf_bp,
     ):
         app.register_blueprint(bp)
 

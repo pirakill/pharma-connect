@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Credit Alerts{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Credit Alerts</h2>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{{ url_for('scf.alerts', scan=1) }}">Scan Now</a>
+    <a class="btn btn-secondary" href="{{ url_for('scf.alerts', all=1) }}">Show Resolved</a>
+    <a class="btn btn-secondary" href="{{ url_for('scf.hub') }}">SCF Hub</a>
+  </div>
+</div>
+<div class="card list-card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>When</th><th>Type</th><th>Party</th><th>Severity</th><th>Message</th><th></th></tr></thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr class="{% if a.severity == 'HIGH' %}cell-danger{% endif %}">
+          <td>{{ a.created_at.strftime('%d-%b %H:%M') }}</td>
+          <td>{{ a.alert_type }}</td>
+          <td>{{ a.subject_name }}</td>
+          <td>{{ a.severity }}</td>
+          <td>{{ a.message }}</td>
+          <td>
+            {% if not a.is_resolved %}
+            <form method="post" action="{{ url_for('scf.resolve_alert', aid=a.id) }}" class="inline-form">
+              <button class="btn btn-sm btn-secondary" type="submit">Resolve</button>
+            </form>
+            {% else %}<span class="text-muted">Resolved</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-muted">No alerts</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Credit Profiles{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Credit Profiles</h2>
+  <div class="topbar-actions">
+    {% if not is_distributor %}
+    <form method="post" action="{{ url_for('scf.refresh_profiles') }}" class="inline-form">
+      <button class="btn btn-primary" type="submit">Refresh Scores</button>
+    </form>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('scf.hub') }}">SCF Hub</a>
+  </div>
+</div>
+<div class="card list-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Party</th><th>Type</th><th>Score</th><th>Tier</th><th>Rec. Limit</th><th>Days</th><th>Flags</th><th>Scored</th></tr>
+      </thead>
+      <tbody>
+        {% for p in profiles %}
+        <tr>
+          <td>{{ p.subject_name }}</td>
+          <td>{{ p.subject_type }}</td>
+          <td><strong>{{ p.score }}</strong></td>
+          <td><span class="badge badge-{% if p.tier == 'A' %}ok{% elif p.tier == 'B' %}full{% else %}hospital{% endif %}">{{ p.tier }}</span></td>
+          <td>₹{{ "{:,.0f}".format(p.recommended_limit) }}</td>
+          <td>{{ p.recommended_days }}</td>
+          <td>{% if p.fraud_flags %}{{ p.fraud_flags }}{% else %}—{% endif %}</td>
+          <td>{{ p.last_scored_on.strftime('%d-%b-%Y') if p.last_scored_on else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-muted">No profiles yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Request Financing{% endblock %}
+{% block content %}
+<div class="topbar"><h2>Request Invoice Financing</h2></div>
+<div class="card form-page-narrow">
+  <form method="post">
+    <div class="form-row">
+      <label>Credit Invoice</label>
+      <select name="bill_id" required>
+        <option value="">Select invoice</option>
+        {% for b in bills %}
+        <option value="{{ b.id }}" {% if preselect_bill == b.id %}selected{% endif %}>
+          {{ b.number }} — {{ b.customer_name }} — ₹{{ b.balance_due }} due {{ b.due_date.strftime('%d-%b') if b.due_date else '—' }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Lender Partner</label>
+      <select name="lender_id" required>
+        {% for l in lenders %}
+        <option value="{{ l.id }}">{{ l.name }} ({{ l.advance_rate_pct }}% advance, min score {{ l.min_score }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Notes</label>
+      <input name="notes" placeholder="PO reference, urgency, etc.">
+    </div>
+    <button class="btn btn-primary" type="submit">Submit for Discounting</button>
+  </form>
+  <p class="hint-box">Mock SCF flow — lender desk reviews, approves, and disburses. Credit score must meet lender minimum.</p>
+</div>
+{% endblock %}

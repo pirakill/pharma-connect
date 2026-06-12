@@ -16,6 +16,7 @@ from .purchase import Supplier, PurchaseBill, PurchaseLine, PurchaseReturn, Purc
 from .promotions import Scheme
 from .returns import SaleReturn, SaleReturnLine
 from .settings import AuditLog, IntegrationSettings, SmsLog
+from .scf import LenderPartner, CreditProfile, FinancingRequest, CreditAlert
 
 __all__ = [
     "Organization", "User", "Role", "TaxSlab", "Item",
@@ -26,4 +27,5 @@ __all__ = [
     "Supplier", "PurchaseBill", "PurchaseLine", "PurchaseReturn", "PurchaseReturnLine",
     "Scheme", "SaleReturn", "SaleReturnLine",
     "IntegrationSettings", "AuditLog", "SmsLog",
+    "LenderPartner", "CreditProfile", "FinancingRequest", "CreditAlert",
 ]

@@ -12,12 +12,13 @@ ROLE_PERMISSIONS: dict[str, set[str] | None] = {
     "FACILITY_ADMIN": {
         "billing", "purchases", "returns", "customers", "schemes", "patients",
         "reports", "inventory", "integrations", "audit", "sms", "accounting",
-        "import", "suppliers", "items_view", "users_manage",
+        "import", "suppliers", "items_view", "users_manage", "scf",
     },
     "CASHIER": {
         "billing", "returns", "customers", "schemes", "reports", "inventory_view",
         "items_view",
     },
+    "LENDER": {"scf_lender"},
 }
 
 
@@ -53,7 +54,11 @@ API_ENDPOINT_PERMISSIONS: dict[str, str] = {
     "api.warehouse_batches": "inventory",
     "api.customer_billing_context": "customers",
     "api.verify_payment": "integrations",
+    "api.scf_webhook": "__public__",
 }
+
+def is_lender_user(user) -> bool:
+    return bool(user and user.is_authenticated and role_code(user) == "LENDER")
 
 
 def check_permission(perm: str, *, api: bool = False):
@@ -74,6 +79,8 @@ def check_api_permission(endpoint: str | None):
     if not current_user.is_authenticated:
         return None
     perm = API_ENDPOINT_PERMISSIONS.get(endpoint or "")
+    if perm == "__public__":
+        return None
     if not perm:
         return None
     if perm == "__inventory_read__":

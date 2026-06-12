@@ -19,6 +19,8 @@ def login():
                 entity_type="USER", entity_ref=user.username,
             )
             db.session.commit()
+            if user.role and user.role.code == "LENDER":
+                return redirect(url_for("scf.lender_hub"))
             return redirect(url_for("dashboard.home"))
         flash("Invalid credentials", "error")
     return render_template("login.html")

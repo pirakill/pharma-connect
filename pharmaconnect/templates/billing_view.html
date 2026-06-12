@@ -16,6 +16,13 @@
     <a class="btn btn-secondary no-print" href="{{ url_for('billing.eway_export', bid=bill.id) }}">E-way JSON</a>
     {% endif %}
     {% if can_return %}<a class="btn btn-secondary" href="{{ url_for('returns.new', bid=bill.id) }}">Sales Return</a>{% endif %}
+    {% if can_scf and bill.balance_due and bill.balance_due > 0 %}
+      {% if existing_fin %}
+      <a class="btn btn-accent-outline" href="{{ url_for('scf.financing_view', rid=existing_fin.id) }}">SCF {{ existing_fin.status }}</a>
+      {% else %}
+      <a class="btn btn-accent-outline" href="{{ url_for('scf.financing_new') }}?bill={{ bill.id }}">Request Financing</a>
+      {% endif %}
+    {% endif %}
   </div>
 </div>
 
@@ -31,6 +38,8 @@
       <div>Date: {{ bill.billed_on.strftime('%d-%b-%Y %H:%M') }}<br>
       Type: {{ bill.bill_type }}<br>
       Payment: {{ bill.payment_mode }}{% if bill.payment_ref %} ({{ bill.payment_ref }}){% endif %}
+      {% if bill.due_date %}<br>Due: {{ bill.due_date.strftime('%d-%b-%Y') }}{% endif %}
+      {% if bill.balance_due and bill.balance_due > 0 %}<br>Balance: ₹{{ "{:,.2f}".format(bill.balance_due) }}{% endif %}
       {% if bill.irn %}<br>IRN: {{ bill.irn }}{% endif %}
       {% if bill.order_ref %}<br>PO/Ref: {{ bill.order_ref }}{% endif %}</div>
     </div>

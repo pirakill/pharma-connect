@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Lender Desk{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h2>{{ lender.name }} — Lender Desk</h2>
+    <p class="page-meta">Invoice discounting queue (mock SCF partner)</p>
+  </div>
+</div>
+
+<div class="grid grid-3 mb-2">
+  <div class="card stat-card">
+    <div class="stat-label">Pending Review</div>
+    <div class="stat-value">{{ pending }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Approved</div>
+    <div class="stat-value">{{ approved }}</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-label">Disbursed</div>
+    <div class="stat-value">{{ disbursed }}</div>
+  </div>
+</div>
+
+<div class="card list-card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Submitted</th><th>Facility</th><th>Invoice</th><th>Customer</th><th>Requested</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for r in queue %}
+        <tr>
+          <td>{{ r.submitted_at.strftime('%d-%b') }}</td>
+          <td>{{ r.organization.name }}</td>
+          <td>{{ r.bill.number }}</td>
+          <td>{{ r.bill.customer_name }}</td>
+          <td>₹{{ "{:,.2f}".format(r.requested_amount) }}</td>
+          <td>{{ r.status }}</td>
+          <td><a href="{{ url_for('scf.financing_view', rid=r.id) }}">Review</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-muted">No requests in queue</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-1">
+  <h3>Webhook Integration (Mock)</h3>
+  <p class="hint-box">
+    POST <code>/api/scf/webhook/OXYZO</code> with header <code>X-Webhook-Secret: oxyzo-demo-secret</code><br>
+    Body: <code>{"action": "APPROVE", "lender_ref": "MOCK-XXXX"}</code> after approval assigns ref.
+  </p>
+</div>
+{% endblock %}

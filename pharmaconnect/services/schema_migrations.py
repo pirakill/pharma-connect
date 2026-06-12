@@ -110,3 +110,8 @@ def ensure_schema() -> None:
         db.session.commit()
     except Exception:
         db.session.rollback()
+
+    _add_column(
+        "users", "lender_partner_id",
+        "ALTER TABLE users ADD COLUMN lender_partner_id INTEGER",
+    )
